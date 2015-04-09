@@ -1,21 +1,16 @@
 <?php
 
-class DB_Functions {
+class DB_UserFunctions {
 
+	protected $db;
     protected $pdo;
-
+	
     //constucteur
     function __construct() {
         require 'include/DB_Connect.php';
         // se connecter à la base de données
-		try {
-			$conn = new PDO('mysql:host=localhost;dbname=moveo_database', 'root', '');
-			$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		}
-		catch(Exception $e) {
-			echo 'Erreur lors de la création de la base de données: ' . $e->getMessage();
-		}
-		$this->pdo = $conn;
+		$this->db= new DB_Connect();
+		$this->pdo = $this->db->getPdo();
     }
 
     // fermer la base de données
@@ -35,6 +30,7 @@ class DB_Functions {
         $hash = $this->hashSSHA($password);
         $encrypted_password = $hash["encrypted"]; // mot de passe crypté
         $salt = $hash["salt"]; // clé pour la securité du mot de passe
+        $result = $this->pdo->exec("INSERT INTO user(user_name, user_firstname, user_mail, user_password, user_security_key,access_id) VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt','1')");
 		
         // verifier si l'ajout a été un succes 
         if ($result) {
@@ -54,12 +50,10 @@ class DB_Functions {
         // compter le nombre de reponses (lignes) 
         $resultUser = $result->rowCount();
         if ($resultUser > 0) {
-            $result = $db->fetch();
+            $result = $result->fetch();
             $key = $result['user_security_key'];
             $encrypted_password = $result['user_password'];
             $hash = $this->checkhashSSHA($key, $password);
-			
-			echo " hash : ".$hash." mot de passe encrypted : ".$encrypted_password;
 			
             // verifier si les mots sont identiques 
             if ($encrypted_password == $hash) {
@@ -84,6 +78,24 @@ class DB_Functions {
         if($resultEmail) {
             // l'utilisateur existe
             return true;
+        } else {
+            // l'utilisateur n'existe pas
+            return false;
+        }
+    }
+	
+	/**
+     * Verifie si l'utilisateur existe
+	 * @param email
+	 * retourne l'id s'il existe, faux s'il n'existe pas 
+     */
+    public function getUserIdByEmail($email) {
+        $result = $this->pdo->query("SELECT user_id FROM user WHERE user_mail = '$email'");
+		$resultEmail = $result->rowCount();
+		
+        if($resultEmail) {
+            // l'utilisateur existe
+            return $result['user_id'];
         } else {
             // l'utilisateur n'existe pas
             return false;

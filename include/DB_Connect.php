@@ -2,11 +2,18 @@
 
 class DB_Connect {
 
-	var $pdo;
+	private $pdo;
 	
     // Constructeur
     function __construct() {
-        
+        try {
+			$conn = new PDO('mysql:host=localhost;dbname=moveo_database', 'root', '');
+			$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		}
+		catch(Exception $e) {
+			echo 'Erreur lors de la création de la base de données: ' . $e->getMessage();
+		}
+		$this->pdo = $conn;
     }
 
     // Fermer fonction
@@ -15,11 +22,8 @@ class DB_Connect {
     }
 
     // Se connecter à la database
-    public function connect() {
-		
-        // créer un objet de connexion
-		
-		
+    public function getPdo() {
+		return $this->pdo;		
     }
 
     // Fermer la connexion vers la base de données
