@@ -2,20 +2,30 @@
 
 class DB_Functions {
 
-    private $db;
+    protected $pdo;
 
     //constucteur
     function __construct() {
         require 'include/DB_Connect.php';
         // se connecter à la base de données
-        $this->db = new DB_Connect();
-        $this->db->connect();
+		try {
+			$conn = new PDO('mysql:host=localhost;dbname=moveo_database', 'root', '');
+			$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		}
+		catch(Exception $e) {
+			echo 'Erreur lors de la création de la base de données: ' . $e->getMessage();
+		}
+		$this->pdo = $conn;
     }
 
-    // destructor
+    // fermer la base de données
     function __destruct() {
-        
+        $db = null;
     }
+	
+	public function closeDataBase(){
+		$db = null;
+	}
 
     /**
      * Enregister un nouveau utilisateur 
@@ -24,8 +34,8 @@ class DB_Functions {
     public function storeUser($name, $firstName, $email, $password) {
         $hash = $this->hashSSHA($password);
         $encrypted_password = $hash["encrypted"]; // mot de passe crypté
-        $salt = $hash["salt"]; // salt
-        $result = $this->db->connect()->exec("INSERT INTO utilisateur(nom_utilisateur, prenom_utilisateur, email_utilisateur, mot_de_passe_utilisateur, cle_utilisateur) VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt')");
+        $salt = $hash["salt"]; // clé pour la securité du mot de passe
+        $result = $pdo->exec("INSERT INTO user(user_name, user_firstname, user_email, user_password, user_security_key) VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt')");
 		
         // verifier si l'ajout a été un succes 
         if ($result) {
@@ -41,17 +51,20 @@ class DB_Functions {
 	 * retourne les informations de l'utilisateur
      */
     public function getUserByEmailAndPassword($email, $password) {
-        $result = mysql_query("SELECT * FROM users WHERE email = '$email'") or die(mysql_error());
-        // check for result 
-        $no_of_rows = mysql_num_rows($result);
-        if ($no_of_rows > 0) {
-            $result = mysql_fetch_array($result);
-            $salt = $result['salt'];
-            $encrypted_password = $result['encrypted_password'];
-            $hash = $this->checkhashSSHA($salt, $password);
-            // check for password equality
+        $result = $pdo->query("SELECT * FROM user WHERE user_email = '$email'");
+        // compter le nombre de reponses (lignes) 
+        $resultUser = $result->rowCount();
+        if ($resultUser > 0) {
+            $result = $db->fetch();
+            $key = $result['user_security_key'];
+            $encrypted_password = $result['user_password'];
+            $hash = $this->checkhashSSHA($key, $password);
+			
+			echo " hash : ".$hash." mot de passe encrypted : ".$encrypted_password;
+			
+            // verifier si les mots sont identiques 
             if ($encrypted_password == $hash) {
-                // user authentication details are correct
+                // si les mots de passes sont identiques envoyer les informations 
                 return $result;
             }
         } else {
@@ -66,7 +79,7 @@ class DB_Functions {
 	 * retourne vrai s'il existe, faux s'il n'existe pas 
      */
     public function isUserExisted($email) {
-        $result = $this->db->connect()->query("SELECT email_utilisateur FROM utilisateur WHERE email_utilisateur = '$email'");
+        $result = $db->query("SELECT user_email FROM user WHERE user_email = '$email'");
 		$resultEmail = $result->rowCount();
 		
         if($resultEmail) {
@@ -93,7 +106,7 @@ class DB_Functions {
     }
 
     /**
-     * Decrypting password
+     * Decrypter le mot de passe 
      * @param salt, password
      * returns hash string
      */

@@ -7,11 +7,11 @@
   /**
  * Verification des requetes sous la forme de GET 
  */
-if (isset($_POST['tag']) && $_POST['tag'] != '') {
+if (isset($_GET['tag']) && $_GET['tag'] != '') {
     // Recuperer le TAG
-    $tag = $_POST['tag'];
+    $tag = $_GET['tag'];
 
-    // include db handler
+    // inclure la classe db_function 
     require_once 'include/DB_Functions.php';
     $db = new DB_Functions();
 
@@ -19,36 +19,33 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
     $response = array("tag" => $tag, "success" => 0, "error" => 0);
 
     // Verification des TAGS
-    if ($tag == 'login') {/*
-        // Request type is check Login
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+    if ($tag == 'login') {
+        // les informations du formulaire de connexion
+        $email = $_GET['email'];
+        $password = $_GET['password'];
 
-        // check for user
+        // verifier si l'utilisateur existe
         $user = $db->getUserByEmailAndPassword($email, $password);
         if ($user != false) {
             // user found
             // echo json with success = 1
             $response["success"] = 1;
-            $response["uid"] = $user["unique_id"];
-            $response["user"]["name"] = $user["name"];
-            $response["user"]["email"] = $user["email"];
-            $response["user"]["created_at"] = $user["created_at"];
-            $response["user"]["updated_at"] = $user["updated_at"];
+            $response["user"]["name"] = $user["nom_utilisateur"];
+            $response["user"]["firstname"] = $user["prenom_utilisateur"];
             echo json_encode($response);
         } else {
             // user not found
             // echo json with error = 1
             $response["error"] = 1;
-            $response["error_msg"] = "Incorrect email or password!";
+            $response["error_msg"] = "L'email ou le mot de passe est incorrect";
             echo json_encode($response);
-        } */
+        } 
     } else if ($tag == 'register') { // si le TAG est register(Inscription)
         
-        $name = $_POST['name'];
-		$firstName = $_POST['firstName'];
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+        $name = $_GET['name'];
+		$firstName = $_GET['firstName'];
+        $email = $_GET['email'];
+        $password = $_GET['password'];
 
         // Verifier si l'utilisateur existe
         if ($db->isUserExisted($email)) {
@@ -68,7 +65,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
             } else {
                 // Si l'utilisateur n'a pas pu être enregister donc envoyer un message d'erreur
                 $response["error"] = 1;
-                $response["error_msg"] = "nom : ".$name." prenom : ".$firstName." mail : ".$email." mot de passe : ".$password;
+                $response["error_msg"] = "l'utilisateur n'a pas été enregister";
                 echo json_encode($response);
             }
         }
