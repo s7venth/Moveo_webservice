@@ -35,7 +35,6 @@ class DB_Functions {
         $hash = $this->hashSSHA($password);
         $encrypted_password = $hash["encrypted"]; // mot de passe crypté
         $salt = $hash["salt"]; // clé pour la securité du mot de passe
-        $result = $pdo->exec("INSERT INTO user(user_name, user_firstname, user_email, user_password, user_security_key) VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt')");
 		
         // verifier si l'ajout a été un succes 
         if ($result) {
@@ -51,7 +50,7 @@ class DB_Functions {
 	 * retourne les informations de l'utilisateur
      */
     public function getUserByEmailAndPassword($email, $password) {
-        $result = $pdo->query("SELECT * FROM user WHERE user_email = '$email'");
+        $result = $this->pdo->query("SELECT * FROM user WHERE user_mail = '$email'");
         // compter le nombre de reponses (lignes) 
         $resultUser = $result->rowCount();
         if ($resultUser > 0) {
@@ -79,7 +78,7 @@ class DB_Functions {
 	 * retourne vrai s'il existe, faux s'il n'existe pas 
      */
     public function isUserExisted($email) {
-        $result = $db->query("SELECT user_email FROM user WHERE user_email = '$email'");
+        $result = $this->pdo->query("SELECT user_mail FROM user WHERE user_mail = '$email'");
 		$resultEmail = $result->rowCount();
 		
         if($resultEmail) {
