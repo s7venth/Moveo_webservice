@@ -62,7 +62,6 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
             $user = $userfunc->storeUser($name, $firstName, $email, $password);
             if ($user) {
                 // Si l'utilisateur a été enregister 
-                echo "Votre compte ";
 				$response["success"] = 1;
                 $response["error_msg"] = "Enregistrement réussi";
                 echo json_encode($response);
@@ -73,33 +72,80 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
                 echo json_encode($response);
             }
         }
-    } else if ($tag == 'trip'){
-		
-		$country = $_GET['country'];
-		$city = $_GET['city'];
-        $description = $_GET['description'];
-        $email = $_GET['email'];
-		
-		$user_id = $tripfunc->getUserIdByEmail($email);
-		if ($user_id) {
-			$trip = $tripfunc->storeTrip($country,$city,$description,$user_id);
-				if ($trip) {
-					// Si le voyage a été enregister 
-					$response["success"] = 1;
-					$response["message"] = "Enregistrement réussi";
-					echo json_encode($response);
-				} else {
-					// Si le voyage n'a pas pu être enregister donc envoyer un message d'erreur
-					$response["error"] = 1;
-					$response["error_msg"] = "le voyage n'a pas été enregisté";
+    } else if ($tag == 'trip'){ 
+		if(isset($_GET['option'])){
+			$option = $_GET['option'];
+			if($option == 'add'){
+				if(isset($_GET['country'])&&isset($_GET['city'])&&isset($_GET['email'])){
+					
+					// Les champs obligatoires
+					$country = $_GET['country'];
+					$city = $_GET['city'];
+					$email = $_GET['email'];
+					
+					// Les champs optionnels	
+					$description = isset($_GET['description'])?$_GET['description']:"";
+					
+					// Recuperer l'id de l'utilisateur grace à son adresse mail
+					$user_id = $tripfunc->getUserIdByEmail($email);
+					if ($user_id) {
+						$trip = $tripfunc->storeTrip($country,$city,$description,$user_id);
+							if ($trip) {
+								// Si le voyage a été enregister 
+								$response["success"] = 1;
+								$response["message"] = "Enregistrement du voyage réussi";
+								echo json_encode($response);
+							} else {
+								// Si le voyage n'a pas pu être enregister donc envoyer un message d'erreur
+								$response["error"] = 1;
+								$response["error_msg"] = "le voyage n'a pas été enregisté";
+								echo json_encode($response);
+							}
+					} else {
+						$response["error"] = 2;
+						$response["error_msg"] = "L'email de l'utilisateur n'existe pas ou est incorrect.";
+						echo json_encode($response);	
+					}
+				}else{
+					$response["error"] = 3;
+					$response["error_msg"] = "Les informations sur le pays et la ville du voyage ainsi que l'email de l'utilisateur sont obligatoires.";
 					echo json_encode($response);
 				}
-        } else {
-            $response["error"] = 2;
-            $response["error_msg"] = "L'utilisateur non trouvé";
-            echo json_encode($response);
-            
-        }
+			}else if($option == 'get'){
+				$result = $tripfunc->getTenTrip();
+				foreach($result as $row){
+					 $response[] = array('country' => $row['trip_country'],
+											'city' => $row['trip_city'],
+									 'description' => $row['trip_description'],
+									 'created_at' => $row['trip_created_at'],
+									 'author_firstname' => $row['user_name'],
+									 'author_name' => $row['user_firstname']
+									 );
+				}
+				$response["success"] = 2;
+				echo json_encode($response);
+			}else if($option == "delete"){
+				if( (isset($_GET['email'])) && (isset($_GET['trip_id'])) ) {
+					$trip_id = $_GET['trip_id'];
+					$user_id = $tripfunc->getUserIdByEmail($_GET['email']);
+					echo " id : ".$user_id;
+					if($user_id){
+						$result = $tripfunc->removeTripByIdTripAndIdUser($trip_id,$user_id);
+						$response["success"] = 5;
+						$response["error_msg"] = "le voyage a été supprimé";
+						echo json_encode($response);
+					}
+				}
+			}else{
+				$response["error"] = 5 ;
+				$response["error_msg"] = "Cette option n'existe pas";
+				echo json_encode($response);
+			}
+		}else{
+			$response["error"] = 4 ;
+			$response["error_msg"] = "Option indisponible";
+			echo json_encode($response);
+		}
 		
 	}else {
         echo "Requête invalide";

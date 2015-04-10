@@ -24,7 +24,7 @@ class DB_UserFunctions {
 
     /**
      * Enregister un nouveau utilisateur 
-     * retourne les informations
+     * return vrai si l'ajout a reussi ou faux s'il a echoué
      */
     public function storeUser($name, $firstName, $email, $password) {
         $hash = $this->hashSSHA($password);
@@ -43,7 +43,7 @@ class DB_UserFunctions {
     /**
      * Recupere tous les informations de l'utilisateur
 	 * @param email et password
-	 * retourne les informations de l'utilisateur
+	 * return les informations de l'utilisateur
      */
     public function getUserByEmailAndPassword($email, $password) {
         $result = $this->pdo->query("SELECT * FROM user WHERE user_mail = '$email'");
@@ -69,7 +69,7 @@ class DB_UserFunctions {
     /**
      * Verifie si l'utilisateur existe
 	 * @param email
-	 * retourne vrai s'il existe, faux s'il n'existe pas 
+	 * return vrai s'il existe, faux s'il n'existe pas 
      */
     public function isUserExisted($email) {
         $result = $this->pdo->query("SELECT user_mail FROM user WHERE user_mail = '$email'");
@@ -85,10 +85,10 @@ class DB_UserFunctions {
     }
 	
 	/**
-     * Verifie si l'utilisateur existe
+     * Recuperer l'id de l'utilisateur grace à son email
 	 * @param email
-	 * retourne l'id s'il existe, faux s'il n'existe pas 
-     */
+	 * return l'id s'il l'utilisateur existe, faux s'il n'existe pas 
+     *
     public function getUserIdByEmail($email) {
         $result = $this->pdo->query("SELECT user_id FROM user WHERE user_mail = '$email'");
 		$resultEmail = $result->rowCount();
@@ -101,11 +101,12 @@ class DB_UserFunctions {
             return false;
         }
     }
-
+	*/
+	
     /**
-     * Encrypting password
+     * Crypter le mot de passe
      * @param password
-     * returns salt and encrypted password
+     * returns le salt et le mot de passe crypté
      */
     public function hashSSHA($password) {
 
