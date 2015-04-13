@@ -7,9 +7,9 @@
   /**
  * Verification des requetes sous la forme de GET 
  */
-if (isset($_POST['tag']) && $_POST['tag'] != '') {
+if (isset($_GET['tag']) && $_GET['tag'] != '') {
     // RECUPERER LE TAG
-    $tag = $_POST['tag'];
+    $tag = $_GET['tag'];
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
 	require_once 'include/DB_TripFunctions.php';
@@ -24,9 +24,9 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			if(isset($_GET['country'])&&isset($_GET['city'])&&isset($_GET['email'])){
 				
 				// Les champs obligatoires
-				$country = $_POST['country'];
-				$city = $_POST['city'];
-				$email = $_POST['email'];
+				$country = $_GET['country'];
+				$city = $_GET['city'];
+				$email = $_GET['email'];
 				
 				// Les champs optionnels	
 				$description = isset($_GET['description'])?$_GET['description']:"";
@@ -59,25 +59,23 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			BREAK;
 			
 		case "get" :
-		
 			$result = $tripfunc->getTenTrip();
 			foreach($result as $row){
 				 $response[] = array('country' => $row['trip_country'],
 										'city' => $row['trip_city'],
 								 'description' => $row['trip_description'],
-								 'created_at' => $row['trip_created_at'],
-								 'author_firstname' => $row['user_name'],
+								  'created_at' => $row['trip_created_at'],
+							'author_firstname' => $row['user_name'],
 								 'author_name' => $row['user_firstname']
 								 );
 			}
 			$response["success"] = 2;
 			echo json_encode($response);
 			BREAK;
-				
 		case "delete" :
 		
 			if( (isset($_GET['email'])) && (isset($_GET['trip_id'])) ) {
-				$trip_id = $_POST['trip_id'];
+				$trip_id = $_GET['trip_id'];
 				$user_id = $tripfunc->getUserIdByEmail($_GET['email']);
 				if($user_id){
 					$result = $tripfunc->removeTripByIdTripAndIdUser($trip_id,$user_id);

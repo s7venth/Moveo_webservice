@@ -29,7 +29,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			if ($result != false) {
 				// L'utilisateur existe : echo json avec success = 1
 				$response["success"] = 1;
-				$response["message"] = "Ami enregister avec succes";
+				$response["message"] = "Ami enregistré avec succès";
 				echo json_encode($response);
 			}else{
 				// l'utilisateur n'existe pas : echo json avec error = 1
@@ -69,6 +69,27 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 				$response["error"] = 1;
 				$response["error_msg"] = "Erreur lors de l'acceptation de la demande";
 				echo json_encode($response);
+			} 
+			BREAK;
+			
+		case 'removeFriend': 
+			$friend_id = $_GET['friend_id'];
+			$user_id = $_GET['user_id'];
+			
+			$result = $friendfunc->removeFriend($user_id, $friend_id);
+			
+			if ($result != false) {
+	
+				$response["success"] = 1;
+				$response["message"] = "L'ami a été supprimé";
+				echo json_encode($response);
+				
+			}else{
+				
+				$response["error"] = 1;
+				$response["error_msg"] = "Erreur lors de la suppression";
+				echo json_encode($response);
+				
 			} 
 			BREAK;
 		

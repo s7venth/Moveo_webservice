@@ -42,7 +42,22 @@ class DB_FriendFunctions {
      * return vrai si l'ajout a reussi ou faux s'il a echoué
      */
     public function acceptFriend($user_id, $friend_id) {
-        $result = $this->pdo->exec("UPDATE is_friend SET is_accepted = '1' where user_id='$user_id' AND friend_id='$friend_id'");
+        $result = $this->pdo->exec("UPDATE is_friend SET is_accepted = '1' WHERE user_id='$user_id' AND friend_id='$friend_id'");
+		
+        // vérifier si l'ajout a été un succès 
+        if ($result) {
+			return true;
+        } else {
+			return false;
+        }
+    }
+	
+	 /**
+     * Supprimer un ami 
+     * return vrai si la suppression a réussi ou faux s'il a echoué
+     */
+    public function removeFriend($user_id, $friend_id) {
+        $result = $this->pdo->exec("DELETE FROM is_friend WHERE user_id='$user_id' AND friend_id='$friend_id'");
 		
         // verifier si l'ajout a été un succes 
         if ($result) {
@@ -53,7 +68,7 @@ class DB_FriendFunctions {
     }
 
     /**
-     * Recupere tous les amis de l'utilisateur
+     * Récupère tous les amis de l'utilisateur
 	 * @param $user_id l'identifiant de l'utilisateur
 	 * return la liste d'amis de l'utilisateur si vrai sinon retourner faux
      */
