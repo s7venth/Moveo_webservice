@@ -1,13 +1,13 @@
-<?php
+﻿<?php
 /** 
  * Chaque requête sera identifier par TAG
  * Les réponses seront données en JSON
  */
-
+// Attention utiliser GET pour verifier directement en HTTP et utiliser POST pour l'appli
 // Verification des requetes sous la forme de GET 
-if (isset($_GET['tag']) && $_GET['tag'] != '') {
+if (isset($_POST['tag']) && $_POST['tag'] != '') {
     // RECUPERER LE TAG
-    $tag = $_GET['tag'];
+    $tag = $_POST['tag'];
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
 	require_once 'include/DB_UserFunctions.php';
@@ -21,8 +21,8 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 		case 'login':
 		
 			// les informations des champs "email" et "mot de passe" du formulaire de connexion
-			$email = $_GET['email'];
-			$password = $_GET['password'];
+			$email = $_POST['email'];
+			$password = $_POST['password'];
 
 			// verifier si l'utilisateur existe
 			$user = $userfunc->getUserByEmailAndPassword($email, $password);
@@ -42,10 +42,10 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			
 		case 'register': 
         
-			$name = $_GET['name'];
-			$firstName = $_GET['firstName'];
-			$email = $_GET['email'];
-			$password = $_GET['password'];
+			$name = $_POST['name'];
+			$firstName = $_POST['firstName'];
+			$email = $_POST['email'];
+			$password = $_POST['password'];
 
 			// Verifier si l'utilisateur existe
 			if ($userfunc->isUserExisted($email)) {
