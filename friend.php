@@ -92,6 +92,34 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 				
 			} 
 			BREAK;
+			
+		case 'getFriend': 
+			$friend_id = $_GET['friend_id'];
+			
+			$result = $friendfunc->getFriend($friend_id);
+			
+			if ($result != false) {
+	
+				$response["success"] = 1;
+				$response["friend"]["name"] = $result['user_name'];
+				$response["friend"]["firstname"] = $result['user_firstname'];
+				$response["friend"]["birthday"] = $result['user_birthday'];
+				$response["friend"]["country"] = $result['user_country'];
+				$response["friend"]["city"] = $result['user_city'];
+				$response["friend"]["favorite_country"] = $result['user_favorite_country'];
+				$response["friend"]["favorite_city"] = $result['user_favorite_city'];
+				$response["friend"]["avatar"] = $result['user_link_avatar'];
+				
+				echo json_encode($response);
+				
+			}else{
+				
+				$response["error"] = 1;
+				$response["error_msg"] = "Erreur lors de la recuperation de l'ami";
+				echo json_encode($response);
+				
+			} 
+			BREAK;
 		
 		default : 
 			echo "Requête invalide";

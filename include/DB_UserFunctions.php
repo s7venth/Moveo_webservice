@@ -72,7 +72,9 @@ class DB_UserFunctions {
 	 * return vrai s'il existe, faux s'il n'existe pas 
      */
     public function isUserExisted($email) {
-        $result = $this->pdo->query("SELECT user_mail FROM user WHERE user_mail = '$email'");
+        $result = $this->pdo->query("SELECT user_mail 
+									 FROM user 
+									 WHERE user_mail = '$email'");
 		$resultEmail = $result->rowCount();
 		
         if($resultEmail) {
@@ -88,9 +90,11 @@ class DB_UserFunctions {
      * Recuperer l'id de l'utilisateur grace à son email
 	 * @param email
 	 * return l'id s'il l'utilisateur existe, faux s'il n'existe pas 
-     *
+     */
     public function getUserIdByEmail($email) {
-        $result = $this->pdo->query("SELECT user_id FROM user WHERE user_mail = '$email'");
+        $result = $this->pdo->query("SELECT user_id 
+									 FROM user 
+									 WHERE user_mail = '$email'");
 		$resultEmail = $result->rowCount();
 		
         if($resultEmail) {
@@ -101,7 +105,26 @@ class DB_UserFunctions {
             return false;
         }
     }
-	*/
+	
+	/**
+     * Recuperer les informations d'un autre utilisateur grace à son identifiant
+	 * @param $user_id
+	 * return Les informations d'un autre utilisateur
+     */
+    public function getOtherUser($otherUser_id) {
+        $result = $this->pdo->query("SELECT user_name, user_firstname, user_birthday, user_link_avatar, user_country, user_city
+									 FROM user WHERE user_id = '$otherUser_id'");
+		$result = $result->fetch();
+		
+        if($result) {
+            // l'utilisateur existe
+            return $result;
+        } else {
+            // l'utilisateur n'existe pas
+            return false;
+        }
+    }
+	
 	
     /**
      * Crypter le mot de passe

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /** 
  * Chaque requête sera identifier par TAG
  * Les réponses seront données en JSON
@@ -68,6 +68,24 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 					echo json_encode($response);
 				}
 			}
+			BREAK;
+			
+		case 'getOtherUser': 
+		
+			$otherUser_id = $_POST['otherUser_id'];
+				
+			$result = $userfunc->getOtherUser($otherUser_id);
+			if ($result != false) {
+				$response["success"] = 1;
+				$response["otherUser"]["name"] = $result["user_name"];
+				$response["otherUser"]["firstname"] = $result["user_firstname"];
+				$response["otherUser"]["avatar"] = $result["user_link_avatar"];
+				echo json_encode($response);
+			}else{
+				$response["error"] = 1;
+				$response["error_msg"] = "Erreur lors de la recuperation de l'utilisateur";
+				echo json_encode($response);
+			} 
 			BREAK;
 			
 		default : 

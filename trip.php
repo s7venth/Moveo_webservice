@@ -58,7 +58,8 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			}
 			BREAK;
 			
-		case "get" :
+		case "getTenTrip" :
+		
 			$result = $tripfunc->getTenTrip();
 			foreach($result as $row){
 				 $response[] = array('country' => $row['trip_country'],
@@ -72,7 +73,8 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			$response["success"] = 2;
 			echo json_encode($response);
 			BREAK;
-		case "delete" :
+			
+		case "deleteTrip" :
 		
 			if( (isset($_GET['email'])) && (isset($_GET['trip_id'])) ) {
 				$trip_id = $_GET['trip_id'];
@@ -82,10 +84,36 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 					$response["success"] = 5;
 					$response["error_msg"] = "le voyage a été supprimé";
 					echo json_encode($response);
-				}
+				}else{
+					$response["error"] = 4;
+					$response["error_msg"] = "Erreur lors de la suppression du voyage";
+					echo json_encode($response);
+				}	
+			}else{
+				$response["error"] = 5;
+				$response["error_msg"] = "Paramètre manquant";
+				echo json_encode($response);
 			}
 			BREAK;
-				
+
+		case "addComment" :
+			
+			$comment_message = $_GET['comment_message'];
+			$trip_id = $_GET['trip_id'];
+			$user_id = $_GET['user_id'];
+			
+			$result = $tripfunc->addComment($comment_message, $trip_id, $user_id);
+			if($result){
+				$response["success"] = 6;
+				$response["error_msg"] = "Le commentaire a bien été ajouté";
+				echo json_encode($response);
+			}else{
+				$response["error"] = 5;
+				$response["error_msg"] = "Erreur lors de l'ajout du commentaire";
+				echo json_encode($response);	
+			}
+			BREAK;
+			
 		default : 
 			echo "Requête invalide";
 	}
