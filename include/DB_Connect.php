@@ -17,9 +17,7 @@ class DB_Connect {
     }
 
     // Fermer fonction
-    function __destruct() {
-		
-    }
+    function __destruct() {}
 
     // Se connecter à la database
     public function getPdo() {

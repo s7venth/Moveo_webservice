@@ -23,14 +23,14 @@ class DB_FriendFunctions {
 	}
 
     /**
-     * Enregister un ami 
-     * return vrai si l'ajout a reussi ou faux s'il a echoué
+     * Enregistrer un ami 
+     * return vrai si l'ajout a réussi ou faux s'il a échoué
      */
     public function addFriend($user_id, $friend_id) {
         $result = $this->pdo->exec("INSERT INTO is_friend(user_id, friend_id, is_accepted) 
 									VALUES('$user_id', '$friend_id','0')");
 		
-        // verifier si l'ajout a été un succes 
+        // verifier si la requête a réalisé l'ajout
         if ($result) {
 			return true;
         } else {
@@ -48,7 +48,7 @@ class DB_FriendFunctions {
 									WHERE user_id='$user_id' 
 									AND friend_id='$friend_id'");
 		
-        // vérifier si l'acceptation a été un succès 
+        // vérifier si la requête a mis à jour l'acceptation
         if ($result) {
 			return true;
         } else {
@@ -65,7 +65,7 @@ class DB_FriendFunctions {
 									WHERE user_id='$user_id' 
 									AND friend_id='$friend_id'");
 		
-        // verifier si la suppression a été un succes 
+        // verifier si la requête a réaliser la suppression 
         if ($result) {
 			return true;
         } else {
@@ -96,7 +96,7 @@ class DB_FriendFunctions {
 	
 	/**
      * Recuperer les informations d'un autre utilisateur grace à son identifiant
-	 * @param $user_id
+	 * @param $friend_id
 	 * return Les informations d'un autre utilisateur
      */
     public function getFriend($friend_id) {

@@ -26,12 +26,25 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 			// verifier si l'utilisateur existe
 			$user = $userfunc->getUserByEmailAndPassword($email, $password);
-			if ($user != false) {
-				// L'utilisateur existe : echo json avec success = 1
-				$response["success"] = 1;
-				$response["user"]["name"] = $user["user_name"];
-				$response["user"]["firstname"] = $user["user_firstname"];
-				echo json_encode($response);
+			if ($user) {
+				$user_id = $userfunc->registerDateConnection($user['user_id']);
+				if($user_id){
+					// L'utilisateur existe : echo json avec success = 1
+					$response["success"] = 1;
+					$response["user"]["id"] = $user["user_id"];
+					$response["user"]["name"] = $user["user_name"];
+					$response["user"]["firstname"] = $user["user_firstname"];
+					$response["user"]["birthday"] = $user["user_firstname"];
+					$response["user"]["email"] = $user["user_mail"];
+					$response["user"]["country"] = $user["user_country"];
+					$response["user"]["city"] = $user["user_city"];
+					$response["user"]["access"] = $user["access_id"];
+					echo json_encode($response);
+				}else{
+					$response["error"] = 2;
+					$response["message"] = "Erreur lors de l'enregistrement de la date de connexion ";
+					echo json_encode($response);
+				}
 			}else{
 				// l'utilisateur n'existe pas : echo json avec error = 1
 				$response["error"] = 1;
@@ -54,7 +67,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				$response["error_msg"] = "L'utilisateur existe deja";
 				echo json_encode($response);
 			} else {
-				// L'utilisateur n'existe pas donc enregistrer l'utilisateur
+				// L'utilisateur n'existe pas donc l'enregistrer 
 				$user = $userfunc->storeUser($name, $firstName, $email, $password);
 				if ($user) {
 					// Si l'utilisateur a été enregister 
@@ -64,7 +77,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				} else {
 					// Si l'utilisateur n'a pas pu être enregister donc envoyer un message d'erreur
 					$response["error"] = 1;
-					$response["error_msg"] = "l'utilisateur n'a pas été enregisté";
+					$response["error_msg"] = "l'utilisateur n'a pas été enregistré";
 					echo json_encode($response);
 				}
 			}
@@ -87,6 +100,14 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				echo json_encode($response);
 			} 
 			BREAK;
+			
+		case 'validate': 
+			
+			$id_user= $_POST['id_user'];
+			$id_key= $_POST['key'];
+			// A SUIVRE !!!!
+			BREAK;
+			
 			
 		default : 
 			echo "Requête invalide";

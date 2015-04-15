@@ -8,6 +8,7 @@
  * Verification des requetes sous la forme de GET 
  */
 if (isset($_GET['tag']) && $_GET['tag'] != '') {
+
     // RECUPERER LE TAG
     $tag = $_GET['tag'];
 
@@ -15,10 +16,11 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 	require_once 'include/DB_TripFunctions.php';
 	$tripfunc = new DB_TripFunctions();
 
-    // response Array
+    // réponse en Array
     $response = array("tag" => $tag, "success" => 0, "error" => 0);
 	
 	switch ($tag){
+
 		case "addTrip" :
 		
 			if(isset($_GET['country'])&&isset($_GET['city'])&&isset($_GET['email'])){

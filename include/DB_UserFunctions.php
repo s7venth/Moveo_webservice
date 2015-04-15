@@ -30,9 +30,28 @@ class DB_UserFunctions {
         $hash = $this->hashSSHA($password);
         $encrypted_password = $hash["encrypted"]; // mot de passe crypté
         $salt = $hash["salt"]; // clé pour la securité du mot de passe
-        $result = $this->pdo->exec("INSERT INTO user(user_name, user_firstname, user_mail, user_password, user_security_key,access_id) VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt','1')");
+        $result = $this->pdo->exec("INSERT INTO user(user_name, user_firstname, user_mail, user_password, user_security_key, user_subscribe_date, access_id) 
+									VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt', now()', '1')");
 		
         // verifier si l'ajout a été un succes 
+        if ($result) {
+			return true;
+        } else {
+			return false;
+        }
+    }
+	
+	/**
+     * Mettre à jour les informations de l'utilisateur 
+     * return vrai si la mise à jour a réussi ou faux si elle a échoué
+     */
+    public function updateUser($user_id, $birthday, $country, $city, $password) {
+        $result = $this->pdo->exec("UPDATE user
+									SET user_birthday = '$birthday'
+									AND user_country = '$country'
+									WHERE user_id='$user_id'");
+		
+        // verifier si la mise à jour a été un succes 
         if ($result) {
 			return true;
         } else {
@@ -65,9 +84,25 @@ class DB_UserFunctions {
             return false;
         }
     }
+	
+	/**
+	 * Met à jour la date et l'heure de la connexion lorsque l'utilisateur se connecte
+	 * @param $user_id l'identifiant de l'utilisateur
+	 * return vrai si l'update a été un succès sinon faux
+	 */
+	public function registerDateConnection($user_id){
+		$result = $this->pdo->query("UPDATE user
+									 SET user_last_connection_datetime=now()
+									 WHERE user_id='$user_id'");
+		if($result){
+			return true;
+		}else{
+			return false;
+		}
+	}
 
     /**
-     * Verifie si l'utilisateur existe
+     * Verifier si l'utilisateur existe
 	 * @param email
 	 * return vrai s'il existe, faux s'il n'existe pas 
      */
@@ -87,10 +122,10 @@ class DB_UserFunctions {
     }
 	
 	/**
-     * Recuperer l'id de l'utilisateur grace à son email
+     * Récupérer l'identifiant de l'utilisateur grace à son email
 	 * @param email
 	 * return l'id s'il l'utilisateur existe, faux s'il n'existe pas 
-     */
+     *
     public function getUserIdByEmail($email) {
         $result = $this->pdo->query("SELECT user_id 
 									 FROM user 
@@ -105,6 +140,7 @@ class DB_UserFunctions {
             return false;
         }
     }
+	*/
 	
 	/**
      * Recuperer les informations d'un autre utilisateur grace à son identifiant

@@ -28,7 +28,7 @@ class DB_TripFunctions {
 	 * @param city : la ville du voyage
 	 * @param description : résumé du voyage 
 	 * @param user_id : l'identifiant de l'utilisateur
-     * return vrai si le voyage a été ajouté, faux s'il ne l'a pas été
+     * @return vrai si le voyage a été ajouté, faux s'il ne l'a pas été
      */
     public function storeTrip($country, $city, $description, $user_id) {
         
@@ -44,28 +44,29 @@ class DB_TripFunctions {
     }
 	
 	 /**
-     * Recuperer les voyages grâce à l'ID de l'utilisateur
+     * Récupérer les voyages d'un utilisateur grâce à son identifiant 
 	 * @param user_id : l'identifiant de l'utilisateur
-     * return la liste des voyages de l'utilisateur
+     * @return la liste des voyages de l'utilisateur
      */
-    public function getTripByIdUser($user_id) {
+    public function getTripListByIdUser($user_id) {
         
         $result = $this->pdo->query("SELECT trip_country,trip_city,trip_description,trip_created_at 
 									 FROM trip 
 									 WHERE user_id = '$user_id'");
-		
-        // verifier si l'ajout a été un succes 
+		$result = $result->fetchAll();
+        // verifier si la requête a réaliser la recuperation a été un succès 
         if ($result) {
-			return true;
+			return $result;
         } else {
 			return false;
         }
     }
 	
 	/**
-     * Recuperer les voyages grâce à l'ID de l'utilisateur
-	 * @param user_id : l'identifiant de l'utilisateur
-     * return la liste des voyages de l'utilisateur
+     * Supprime le voyage grâce à l'identifiant de l'utilisateur et l'identifiant de l'utilisateur
+	 * @param trip_id : l'identifiant de l'utilisateur
+	 * @param user_id : l'identifiant du voyage
+     * @return Vrai si la requête a réaliser la suppression, faux s'il la suppression a échoué
      */
     public function removeTripByIdTripAndIdUser($trip_id,$user_id) {
         
@@ -73,7 +74,7 @@ class DB_TripFunctions {
 									 WHERE user_id = '$user_id' 
 									 AND trip_id='$trip_id'");
 		
-        // verifier si l'ajout a été un succes 
+        // verifier si l'ajout a été un succès 
         if ($result) {
 			return true;
         } else {
@@ -82,8 +83,8 @@ class DB_TripFunctions {
     }
 	
 	 /**
-     * Recuperer 10 voyages de façon aléatoires
-     * return une liste regroupant 10 voyages aléatoires
+     * Récupérer 10 voyages de façon aléatoires
+     * @return une liste regroupant 10 voyages aléatoires, faux s'il la recuperation a échoué 
      */
     public function getTenTrip() {
         
@@ -93,19 +94,84 @@ class DB_TripFunctions {
 									 ORDER BY rand() 
 									 LIMIT 10");
 		$result = $result->fetchAll();
-        // verifier si l'ajout a été un succes 
+		
+         // vérifier si la requête a réaliser la suppression
         if ($result) {
 			return $result;
         } else {
 			return false;
         }
     }
+
+     /**
+     * Récupérer un voyage grâce à son identifiant
+     * @param $trip_id l'identifiant du voyage
+     * @return les informations du voyages ainsi que ses lieux
+     */
+    public function getTrip($trip_id) {
+        
+        $result = $this->pdo->query("SELECT trip,id, trip_country ,trip_city, trip_description, trip_created_at, user_name,user_firstname 
+									 FROM trip,user
+									 WHERE  trip.user_id = user.user_id");
+		$result = $result->fetch();
+        // verifier si la requête a réaliser la recupération 
+        if ($result) {
+			return $result;
+        } else {
+			return false;
+        }
+    }
+
+    /**
+     * Récupérer tous les lieux d'un voyage grâce à son identifiant de celui ci
+     * @param $user_id l'identifiant de l'utilisateur
+     * @param $trip_id l'identifiant du voyage
+     * @return Les lieux d'un voyage
+     */
+    public function getPlaceList($user_id, $trip_id) {
+        
+        $result = $this->pdo->query("SELECT place_id, place_name, place_adresse,category_id
+									 FROM place
+									 WHERE  trip_id = '$trip_id'");
+		$result = $result->fetchAll();
+
+        // vérifier si la requête a réaliser la recupération 
+        if ($result) {
+			return $result;
+        } else {
+			return false;
+        }
+    }
+
+    /**
+     * Ajouter un nouveau lieu dans une categorie passé en paramétre 
+     * @param $place_name le nom de ce lieu
+     * @param $place_adresse l'adresse ou se trouve le lieu
+     * @param $place_description la description de ce lieu
+     * @param $trip_id l'identifiant du voyage
+     * @param $category_id l'identifiant du voyage
+     * @return vrai si l'ajout a reussi, faux l'ajout a echoué 
+     */
+    public function addPlace($place_name, $place_adresse, $place_description, $trip_id, $category_id) {
+        
+        $result = $this->pdo->query("INSERT INTO place (place_name, place_adresse, place_description, trip_id, category_id) 
+        							 VALUES ('$place_name', '$place_adresse', '$place_description', '$trip_id', '$category_id')");
+        
+        // vérifier si la requête a réaliser l'ajout
+        if ($result) {
+			return true;
+        } else {
+			return false;
+        }
+    }
+    
+
 	
-		/**
+	/**
      * Verifie si l'utilisateur existe
 	 * @param email
 	 * retourne l'id s'il existe, faux s'il n'existe pas 
-     */
+     *
     public function getUserIdByEmail($email) {
         $result = $this->pdo->query("SELECT user_id 
 									 FROM user 
@@ -120,7 +186,14 @@ class DB_TripFunctions {
             return false;
         }
     }
+	*/
 	
+	/**
+	 * Ajouter un commentaire
+	 * @param $comment_message 
+	 * @param $trip_id 
+	 * @return vrai si l'ajout à réussi, faux s'il n'a pas reussi
+	 */
 	public function addComment($comment_message, $trip_id, $user_id){
 		$result = $this->pdo->query("INSERT INTO comment (comment_message, comment_added_datetime, trip_id, user_id)
 									 VALUES ('$comment_message', now(), '$trip_id', '$user_id')
