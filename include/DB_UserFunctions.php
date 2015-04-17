@@ -23,17 +23,17 @@ class DB_UserFunctions {
 	}
 
     /**
-     * Enregister un nouveau utilisateur 
-     * return vrai si l'ajout a reussi ou faux s'il a echoué
+     * Enregistrer un nouveau utilisateur 
+     * return vrai si l'ajout a réussi ou faux s'il a échoué
      */
     public function storeUser($name, $firstName, $email, $password) {
         $hash = $this->hashSSHA($password);
         $encrypted_password = $hash["encrypted"]; // mot de passe crypté
-        $salt = $hash["salt"]; // clé pour la securité du mot de passe
-        $result = $this->pdo->exec("INSERT INTO user(user_name, user_firstname, user_mail, user_password, user_security_key, user_subscribe_date, access_id) 
-									VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt', now()', '1')");
+        $salt = $hash["salt"]; // clé pour la sécurité du mot de passe
+        $result = $this->pdo->exec("INSERT INTO user(user_last_name, user_first_name, user_email, user_password, user_security_key, user_subscribe_date, access_id) 
+									VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt', now(), '1')");
 		
-        // verifier si l'ajout a été un succes 
+        // verifier si l'ajout a été un succès 
         if ($result) {
 			return true;
         } else {
@@ -65,7 +65,7 @@ class DB_UserFunctions {
 	 * return les informations de l'utilisateur
      */
     public function getUserByEmailAndPassword($email, $password) {
-        $result = $this->pdo->query("SELECT * FROM user WHERE user_mail = '$email'");
+        $result = $this->pdo->query("SELECT * FROM user WHERE user_email = '$email'");
         // compter le nombre de reponses (lignes) 
         $resultUser = $result->rowCount();
         if ($resultUser > 0) {
@@ -86,13 +86,13 @@ class DB_UserFunctions {
     }
 	
 	/**
-	 * Met à jour la date et l'heure de la connexion lorsque l'utilisateur se connecte
+	 * Mettre à jour la date et l'heure de la connexion lorsque l'utilisateur se connecte
 	 * @param $user_id l'identifiant de l'utilisateur
 	 * return vrai si l'update a été un succès sinon faux
 	 */
-	public function registerDateConnection($user_id){
+	public function registerLoginDate($user_id){
 		$result = $this->pdo->query("UPDATE user
-									 SET user_last_connection_datetime=now()
+									 SET user_last_login_datetime=now()
 									 WHERE user_id='$user_id'");
 		if($result){
 			return true;
@@ -107,9 +107,9 @@ class DB_UserFunctions {
 	 * return vrai s'il existe, faux s'il n'existe pas 
      */
     public function isUserExisted($email) {
-        $result = $this->pdo->query("SELECT user_mail 
+        $result = $this->pdo->query("SELECT user_email 
 									 FROM user 
-									 WHERE user_mail = '$email'");
+									 WHERE user_email = '$email'");
 		$resultEmail = $result->rowCount();
 		
         if($resultEmail) {
@@ -129,7 +129,7 @@ class DB_UserFunctions {
     public function getUserIdByEmail($email) {
         $result = $this->pdo->query("SELECT user_id 
 									 FROM user 
-									 WHERE user_mail = '$email'");
+									 WHERE user_email = '$email'");
 		$resultEmail = $result->rowCount();
 		
         if($resultEmail) {
@@ -143,13 +143,14 @@ class DB_UserFunctions {
 	*/
 	
 	/**
-     * Recuperer les informations d'un autre utilisateur grace à son identifiant
+     * Récupérer les informations d'un autre utilisateur grace à son identifiant
 	 * @param $user_id
 	 * return Les informations d'un autre utilisateur
      */
     public function getOtherUser($otherUser_id) {
-        $result = $this->pdo->query("SELECT user_name, user_firstname, user_birthday, user_link_avatar, user_country, user_city
-									 FROM user WHERE user_id = '$otherUser_id'");
+        $result = $this->pdo->query("SELECT user_last_name, user_first_name, user_link_avatar, user_country
+									 FROM user 
+									 WHERE user_id = '$otherUser_id'");
 		$result = $result->fetch();
 		
         if($result) {
@@ -160,6 +161,18 @@ class DB_UserFunctions {
             return false;
         }
     }
+	
+	public function addDialog($user_id, $other_user_id, $message){
+		$result = $this->pdo->exec("INSERT INTO dialog(user_id, other_user_id, message, sent_datetime, is_read) 
+									VALUES('$user_id', '$other_user_id','$message', now(), '1')");
+									
+		// verifier si la requête a réalisé l'ajout
+        if ($result) {
+			return true;
+        } else {
+			return false;
+        }
+	}
 	
 	
     /**
@@ -177,9 +190,10 @@ class DB_UserFunctions {
     }
 
     /**
-     * Decrypter le mot de passe 
-     * @param salt, password
-     * returns hash string
+     * Décrypter le mot de passe 
+     * @param $salt clé de sécurité de l'utilisateur
+	 * @param $password mot de passe crypté de l'utilisateur
+     * returns le hash 
      */
     public function checkhashSSHA($salt, $password) {
 

@@ -5,6 +5,8 @@ class DB_FriendFunctions {
 	protected $db;
     protected $pdo;
 	
+	
+	
     // Constructeur
     function __construct() {
         require 'include/DB_Connect.php';
@@ -58,7 +60,7 @@ class DB_FriendFunctions {
 	
 	 /**
      * Supprimer un ami 
-     * return vrai si la suppression a réussi ou faux s'il a echoué
+     * return vrai si la suppression a réussi ou faux s'il a échoué
      */
     public function removeFriend($user_id, $friend_id) {
         $result = $this->pdo->exec("DELETE FROM is_friend 
@@ -80,9 +82,9 @@ class DB_FriendFunctions {
      */
     public function getFriendsList($user_id) {
         $result = $this->pdo->query("
-		SELECT user_name, user_firstname, is_accepted FROM user, is_friend WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id'
+		SELECT user_last_name, user_first_name, is_accepted FROM user, is_friend WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id'
 		UNION
-		SELECT user_name, user_firstname,is_accepted FROM user, is_friend WHERE user.user_id=is_friend.user_id AND is_friend.friend_id ='$user_id'
+		SELECT user_last_name, user_first_name,is_accepted FROM user, is_friend WHERE user.user_id=is_friend.user_id AND is_friend.friend_id ='$user_id'
 		");
 		
         $result = $result->fetchAll();
@@ -95,12 +97,12 @@ class DB_FriendFunctions {
     }
 	
 	/**
-     * Recuperer les informations d'un autre utilisateur grace à son identifiant
+     * Récupérer les informations d'un autre utilisateur grace à son identifiant
 	 * @param $friend_id
 	 * return Les informations d'un autre utilisateur
      */
-    public function getFriend($friend_id) {
-        $result = $this->pdo->query("SELECT user_name, user_firstname, user_birthday, user_link_avatar, user_country, user_city, user_favorite_country, user_favorite_city 
+    public function getFriend($friend_id){
+        $result = $this->pdo->query("SELECT user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city, user_favorite_country, user_favorite_city 
 									 FROM user 
 									 WHERE user_id = '$friend_id'
 									 ");

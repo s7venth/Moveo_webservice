@@ -1,12 +1,10 @@
 ﻿<?php
 /**
- * 
- * chaque requete sera identifier par TAG
- * Les reponses seront données en JSON
-*/
-  /**
- * Verification des requetes sous la forme de GET 
+ * chaque requête sera identifier par TAG
+ * Les réponses seront données en JSON
  */
+ 
+// Verification des requêtes sous la forme de GET 
 if (isset($_GET['tag']) && $_GET['tag'] != '') {
 
     // RECUPERER LE TAG
@@ -36,16 +34,16 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 				// Recuperer l'id de l'utilisateur grace à son adresse mail
 				$user_id = $tripfunc->getUserIdByEmail($email);
 				if ($user_id) {
-					$trip = $tripfunc->storeTrip($country,$city,$description,$user_id);
+					$trip = $tripfunc->addTrip($country,$city,$description,$user_id);
 						if ($trip) {
-							// Si le voyage a été enregister 
+							// Si le voyage a été enregistrer 
 							$response["success"] = 1;
 							$response["message"] = "Enregistrement du voyage réussi";
 							echo json_encode($response);
 						} else {
-							// Si le voyage n'a pas pu être enregister donc envoyer un message d'erreur
+							// Si le voyage n'a pas pu être enregistrer donc envoyer un message d'erreur
 							$response["error"] = 1;
-							$response["error_msg"] = "le voyage n'a pas été enregisté";
+							$response["error_msg"] = "le voyage n'a pas été enregistré";
 							echo json_encode($response);
 						}
 				} else {
@@ -82,7 +80,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 				$trip_id = $_GET['trip_id'];
 				$user_id = $tripfunc->getUserIdByEmail($_GET['email']);
 				if($user_id){
-					$result = $tripfunc->removeTripByIdTripAndIdUser($trip_id,$user_id);
+					$result = $tripfunc->removeTrip($trip_id,$user_id);
 					$response["success"] = 5;
 					$response["error_msg"] = "le voyage a été supprimé";
 					echo json_encode($response);

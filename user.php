@@ -5,13 +5,13 @@
  */
 // Attention utiliser GET pour verifier directement en HTTP et utiliser POST pour l'appli
 // Verification des requetes sous la forme de GET 
-if (isset($_POST['tag']) && $_POST['tag'] != '') {
+if (isset($_GET['tag']) && $_GET['tag'] != '') {
     // RECUPERER LE TAG
-    $tag = $_POST['tag'];
+    $tag = $_GET['tag'];
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
 	require_once 'include/DB_UserFunctions.php';
-	$userfunc = new DB_UserFunctions();
+	$userFunc = new DB_UserFunctions();
 
     // Tableau associatif qui sera envoyé au JSON
     $response = array("tag" => $tag, "success" => 0, "error" => 0);
@@ -21,24 +21,24 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 		case 'login':
 		
 			// les informations des champs "email" et "mot de passe" du formulaire de connexion
-			$email = $_POST['email'];
-			$password = $_POST['password'];
+			$email = $_GET['email'];
+			$password = $_GET['password'];
 
 			// verifier si l'utilisateur existe
-			$user = $userfunc->getUserByEmailAndPassword($email, $password);
+			$user = $userFunc->getUserByEmailAndPassword($email, $password);
 			if ($user) {
-				$user_id = $userfunc->registerDateConnection($user['user_id']);
+				$user_id = $userFunc->registerDateConnection($user['user_id']);
 				if($user_id){
 					// L'utilisateur existe : echo json avec success = 1
 					$response["success"] = 1;
-					$response["user"]["id"] = $user["user_id"];
-					$response["user"]["name"] = $user["user_name"];
-					$response["user"]["firstname"] = $user["user_firstname"];
-					$response["user"]["birthday"] = $user["user_firstname"];
-					$response["user"]["email"] = $user["user_mail"];
-					$response["user"]["country"] = $user["user_country"];
-					$response["user"]["city"] = $user["user_city"];
-					$response["user"]["access"] = $user["access_id"];
+					$response["user"]["user_id"] = $user["user_id"];
+					$response["user"]["user_last_name"] = $user["user_last_name"];
+					$response["user"]["user_first_name"] = $user["user_first_name"];
+					$response["user"]["user_birthday"] = $user["user_birthday"];
+					$response["user"]["user_email"] = $user["user_email"];
+					$response["user"]["user_country"] = $user["user_country"];
+					$response["user"]["user_city"] = $user["user_city"];
+					$response["user"]["access_id"] = $user["access_id"];
 					echo json_encode($response);
 				}else{
 					$response["error"] = 2;
@@ -55,27 +55,27 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 		case 'register': 
         
-			$name = $_POST['name'];
-			$firstName = $_POST['firstName'];
-			$email = $_POST['email'];
-			$password = $_POST['password'];
+			$name = $_GET['name'];
+			$firstName = $_GET['firstName'];
+			$email = $_GET['email'];
+			$password = $_GET['password'];
 
 			// Verifier si l'utilisateur existe
-			if ($userfunc->isUserExisted($email)) {
+			if ($userFunc->isUserExisted($email)) {
 				// L'utilisateur existe donc envoyer un message d'erreur
 				$response["error"] = 2;
 				$response["error_msg"] = "L'utilisateur existe deja";
 				echo json_encode($response);
 			} else {
 				// L'utilisateur n'existe pas donc l'enregistrer 
-				$user = $userfunc->storeUser($name, $firstName, $email, $password);
+				$user = $userFunc->storeUser($name, $firstName, $email, $password);
 				if ($user) {
-					// Si l'utilisateur a été enregister 
+					// Si l'utilisateur a été enregistrer 
 					$response["success"] = 1;
 					$response["error_msg"] = "Enregistrement réussi";
 					echo json_encode($response);
 				} else {
-					// Si l'utilisateur n'a pas pu être enregister donc envoyer un message d'erreur
+					// Si l'utilisateur n'a pas pu être enregistrer donc envoyer un message d'erreur
 					$response["error"] = 1;
 					$response["error_msg"] = "l'utilisateur n'a pas été enregistré";
 					echo json_encode($response);
@@ -85,14 +85,14 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 		case 'getOtherUser': 
 		
-			$otherUser_id = $_POST['otherUser_id'];
+			$otherUser_id = $_GET['otherUser_id'];
 				
-			$result = $userfunc->getOtherUser($otherUser_id);
+			$result = $userFunc->getOtherUser($otherUser_id);
 			if ($result != false) {
 				$response["success"] = 1;
-				$response["otherUser"]["name"] = $result["user_name"];
-				$response["otherUser"]["firstname"] = $result["user_firstname"];
-				$response["otherUser"]["avatar"] = $result["user_link_avatar"];
+				$response["otherUser"]["user_name"] = $result["user_name"];
+				$response["otherUser"]["user_firstname"] = $result["user_firstname"];
+				$response["otherUser"]["user_link_avatar"] = $result["user_link_avatar"];
 				echo json_encode($response);
 			}else{
 				$response["error"] = 1;
@@ -103,11 +103,28 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 		case 'validate': 
 			
-			$id_user= $_POST['id_user'];
-			$id_key= $_POST['key'];
+			$id_user= $_GET['id_user'];
+			$id_key= $_GET['key'];
 			// A SUIVRE !!!!
 			BREAK;
+		
+		case 'addDialog' :
+			$message = $_GET['message'];
+			$user_id = $_GET['user_id'];
+			$other_user_id = $_GET['other_user_id'];
 			
+			$result = $userFunc->addDialog($user_id, $other_user_id, $message);
+			
+			if($result){
+				$response["success"] = 1;
+				$response["message"] = "Le message a été ajouté avec succès";
+				echo json_encode($response);
+			}else{
+				$response["error"] = 1;
+				$response["message"] = "Erreur lors de l'ajout du dialogue";
+				echo json_encode($response);
+			}
+			BREAK;
 			
 		default : 
 			echo "Requête invalide";

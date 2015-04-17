@@ -3,15 +3,16 @@
  * Chaque requête sera identifier par TAG
  * Les réponses seront données en JSON
  */
-// Attention utiliser GET pour verifier directement en HTTP et utiliser POST pour l'appli
-// Verification des requetes sous la forme de GET 
+ 
+// Attention utiliser GET pour verifier directement en HTTP et utiliser POST pour l'application
+// Verification des requêtes sous la forme de GET 
 if (isset($_GET['tag']) && $_GET['tag'] != '') {
     // RECUPERER LE TAG
     $tag = $_GET['tag'];
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
 	require_once 'include/DB_FriendFunctions.php';
-	$friendfunc = new DB_FriendFunctions();
+	$friendFunc = new DB_FriendFunctions();
 
     // Tableau associatif qui sera envoyé au JSON
     $response = array("tag" => $tag, "success" => 0, "error" => 0);
@@ -25,7 +26,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			$user_id = $_GET['user_id'];
 
 			// verifier si l'utilisateur existe
-			$result = $friendfunc->addFriend($user_id, $friend_id);
+			$result = $friendFunc->addFriend($user_id, $friend_id);
 			if ($result != false) {
 				// L'utilisateur existe : echo json avec success = 1
 				$response["success"] = 1;
@@ -34,7 +35,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			}else{
 				// l'utilisateur n'existe pas : echo json avec error = 1
 				$response["error"] = 1;
-				$response["error_msg"] = "Ami non ajouté";
+				$response["message"] = "Ami non ajouté";
 				echo json_encode($response);
 			} 
 			BREAK;
@@ -42,14 +43,14 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 		case 'getFriendsList': 
         
 			$user_id = $_GET['user_id'];
-			$result = $friendfunc->getFriendsList($user_id);
+			$result = $friendFunc->getFriendsList($user_id);
 			foreach($result as $row){
 				 $response[] = array('friend_name' => $row['user_name'],
 									 'friend_firstname' => $row['user_firstname'],
 									 'friend_is_accepted' => $row['is_accepted']
 								 );
 			}
-			$response["success"] = 2;
+			$response["success"] = 1;
 			echo json_encode($response);
 			BREAK;
 			
@@ -57,7 +58,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			$friend_id = $_GET['friend_id'];
 			$user_id = $_GET['user_id'];
 			
-			$result = $friendfunc->acceptFriend($user_id, $friend_id);
+			$result = $friendFunc->acceptFriend($user_id, $friend_id);
 			
 			if ($result != false) {
 	
@@ -67,7 +68,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			}else{
 				
 				$response["error"] = 1;
-				$response["error_msg"] = "Erreur lors de l'acceptation de la demande";
+				$response["message"] = "Erreur lors de l'acceptation de la demande";
 				echo json_encode($response);
 			} 
 			BREAK;
@@ -76,7 +77,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			$friend_id = $_GET['friend_id'];
 			$user_id = $_GET['user_id'];
 			
-			$result = $friendfunc->removeFriend($user_id, $friend_id);
+			$result = $friendFunc->removeFriend($user_id, $friend_id);
 			
 			if ($result != false) {
 	
@@ -87,7 +88,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			}else{
 				
 				$response["error"] = 1;
-				$response["error_msg"] = "Erreur lors de la suppression";
+				$response["message"] = "Erreur lors de la suppression";
 				echo json_encode($response);
 				
 			} 
@@ -96,7 +97,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 		case 'getFriend': 
 			$friend_id = $_GET['friend_id'];
 			
-			$result = $friendfunc->getFriend($friend_id);
+			$result = $friendFunc->getFriend($friend_id);
 			
 			if ($result != false) {
 	
@@ -120,7 +121,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 				
 			} 
 			BREAK;
-		
+			
 		default : 
 			echo "Requête invalide";
     }
