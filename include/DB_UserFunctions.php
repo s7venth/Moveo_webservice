@@ -37,8 +37,8 @@ class DB_UserFunctions {
 		
         // verifier si l'ajout a été un succès 
         if ($result) {
-			/*$a = mail('sylvain91130@hotmail.fr', 'Mon Sujet', "http://10.0.3.2/Moveo_webservice/validation.php?key=".$validation_key_to_send."&id=12");
-			if($a) echo "ok";else echo "non ok";*/
+			$a = mail('sylvain91130@hotmail.fr', 'Mon Sujet', 'http://127.0.0.1/Moveo_webservice/validation.php?key='.$validation_key_to_send.'&id=42');
+			if($a) echo "ok";else echo "non ok";
 			return true;
         } else {
 			return false;

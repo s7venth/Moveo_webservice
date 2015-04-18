@@ -1,6 +1,6 @@
 <?php
 
-class DB_UserFunctions {
+class DB_ValidationFunctions {
 
 	protected $db;
     protected $pdo;
@@ -27,7 +27,7 @@ class DB_UserFunctions {
 		$key = sha1($key);
 		echo "KEY après : ".$key;
 		$result = $this->pdo->query("UPDATE user
-									 SET access_id = '2'
+									 SET access_id = '2',user_password_temp = ''
 									 WHERE user_id = '$id'
 									 AND user_password_temp = '$key'
 									");

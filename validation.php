@@ -15,7 +15,7 @@ if (isset($_GET['key']) && $_GET['key'] != '' && isset($_GET['id']) && $_GET['id
 	$validationFunc = new DB_ValidationFunctions();
 
     // Tableau associatif qui sera envoyé au JSON
-    $response = array("tag" => $tag, "success" => 0, "error" => 0);
+    $response = array("key" => $key, "success" => 0, "error" => 0);
 	
 	$result = $validationFunc->validateUserAccompt($key, $id);
     
