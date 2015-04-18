@@ -86,7 +86,7 @@ class DB_TripFunctions {
      * Récupérer 10 voyages de façon aléatoires
      * @return une liste regroupant 10 voyages aléatoires, faux s'il la recuperation a échoué 
      */
-    public function getTenTrip() {
+    public function getTenTrips() {
         
         $result = $this->pdo->query("SELECT trip_country,trip_city,trip_description,trip_created_at,user_name,user_firstname 
 									 FROM trip,user 

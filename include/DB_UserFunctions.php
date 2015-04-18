@@ -30,11 +30,15 @@ class DB_UserFunctions {
         $hash = $this->hashSSHA($password);
         $encrypted_password = $hash["encrypted"]; // mot de passe crypté
         $salt = $hash["salt"]; // clé pour la sécurité du mot de passe
-        $result = $this->pdo->exec("INSERT INTO user(user_last_name, user_first_name, user_email, user_password, user_security_key, user_subscribe_date, access_id) 
-									VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt', now(), '1')");
+		$validation_key_to_send = substr(sha1(rand()),10,20);
+		$validation_key = sha1($validation_key_to_send);
+        $result = $this->pdo->exec("INSERT INTO user(user_last_name, user_first_name, user_email, user_password, user_security_key, user_password_temp, user_subscribe_date, access_id) 
+									VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt', '$validation_key', now(), '1')");
 		
         // verifier si l'ajout a été un succès 
         if ($result) {
+			/*$a = mail('sylvain91130@hotmail.fr', 'Mon Sujet', "http://10.0.3.2/Moveo_webservice/validation.php?key=".$validation_key_to_send."&id=12");
+			if($a) echo "ok";else echo "non ok";*/
 			return true;
         } else {
 			return false;

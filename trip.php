@@ -58,9 +58,9 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			}
 			BREAK;
 			
-		case "getTenTrip" :
+		case "getTenTrips" :
 		
-			$result = $tripfunc->getTenTrip();
+			$result = $tripfunc->getTenTrips();
 			foreach($result as $row){
 				 $response[] = array('country' => $row['trip_country'],
 										'city' => $row['trip_city'],
