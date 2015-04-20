@@ -5,9 +5,9 @@
  */
 // Attention utiliser GET pour verifier directement en HTTP et utiliser POST pour l'appli
 // Verification des requetes sous la forme de GET 
-if (isset($_GET['tag']) && $_GET['tag'] != '') {
+if (isset($_POST['tag']) && $_POST['tag'] != '') {
     // RECUPERER LE TAG
-    $tag = $_GET['tag'];
+    $tag = $_POST['tag'];
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
 	require_once 'include/DB_UserFunctions.php';
@@ -21,13 +21,13 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 		case 'login':
 		
 			// les informations des champs "email" et "mot de passe" du formulaire de connexion
-			$email = $_GET['email'];
-			$password = $_GET['password'];
+			$email = $_POST['email'];
+			$password = $_POST['password'];
 
 			// verifier si l'utilisateur existe
 			$user = $userFunc->getUserByEmailAndPassword($email, $password);
 			if ($user) {
-				$user_id = $userFunc->registerDateConnection($user['user_id']);
+				$user_id = $userFunc->registerLoginDate($user['user_id']);
 				if($user_id){
 					// L'utilisateur existe : echo json avec success = 1
 					$response["success"] = 1;
@@ -56,10 +56,10 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			
 		case 'register': 
         
-			$name = $_GET['name'];
-			$firstName = $_GET['firstName'];
-			$email = $_GET['email'];
-			$password = $_GET['password'];
+			$name = $_POST['name'];
+			$firstName = $_POST['firstName'];
+			$email = $_POST['email'];
+			$password = $_POST['password'];
 
 			// Verifier si l'utilisateur existe
 			if ($userFunc->isUserExisted($email)) {
@@ -86,7 +86,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			
 		case 'getOtherUser': 
 		
-			$otherUser_id = $_GET['otherUser_id'];
+			$otherUser_id = $_POST['otherUser_id'];
 				
 			$result = $userFunc->getOtherUser($otherUser_id);
 			if ($result != false) {
@@ -104,15 +104,15 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			
 		case 'validate': 
 			
-			$id_user= $_GET['id_user'];
-			$id_key= $_GET['key'];
+			$id_user= $_POST['id_user'];
+			$id_key= $_POST['key'];
 			// A SUIVRE !!!!
 			BREAK;
 		
 		case 'addDialog' :
-			$message = $_GET['message'];
-			$user_id = $_GET['user_id'];
-			$other_user_id = $_GET['other_user_id'];
+			$message = $_POST['message'];
+			$user_id = $_POST['user_id'];
+			$other_user_id = $_POST['other_user_id'];
 			
 			$result = $userFunc->addDialog($user_id, $other_user_id, $message);
 			

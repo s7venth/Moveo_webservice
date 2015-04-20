@@ -1,14 +1,14 @@
-﻿<?php
+<?php
 /**
  * chaque requête sera identifier par TAG
  * Les réponses seront données en JSON
  */
  
 // Verification des requêtes sous la forme de GET 
-if (isset($_GET['tag']) && $_GET['tag'] != '') {
+if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
     // RECUPERER LE TAG
-    $tag = $_GET['tag'];
+    $tag = $_POST['tag'];
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
 	require_once 'include/DB_TripFunctions.php';
@@ -21,15 +21,15 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 
 		case "addTrip" :
 		
-			if(isset($_GET['country'])&&isset($_GET['city'])&&isset($_GET['email'])){
+			if(isset($_POST['country'])&&isset($_POST['city'])&&isset($_POST['email'])){
 				
 				// Les champs obligatoires
-				$country = $_GET['country'];
-				$city = $_GET['city'];
-				$email = $_GET['email'];
+				$country = $_POST['country'];
+				$city = $_POST['city'];
+				$email = $_POST['email'];
 				
 				// Les champs optionnels	
-				$description = isset($_GET['description'])?$_GET['description']:"";
+				$description = isset($_POST['description'])?$_POST['description']:"";
 				
 				// Recuperer l'id de l'utilisateur grace à son adresse mail
 				$user_id = $tripfunc->getUserIdByEmail($email);
@@ -62,23 +62,24 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 		
 			$result = $tripfunc->getTenTrips();
 			foreach($result as $row){
-				 $response[] = array('country' => $row['trip_country'],
-										'city' => $row['trip_city'],
-								 'description' => $row['trip_description'],
-								  'created_at' => $row['trip_created_at'],
-							'author_firstname' => $row['user_name'],
-								 'author_name' => $row['user_firstname']
+				 $response['trip'][] = array(  'trip_id' => $row['trip_id'],
+										   'trip_name' => $row['trip_name'],
+										'trip_country' => $row['trip_country'],
+								    'trip_description' => $row['trip_description'],
+								     'trip_created_at' => $row['trip_created_at'],
+							        'user_last_name' => $row['user_last_name'],
+								         'user_first_name' => $row['user_first_name']
 								 );
 			}
-			$response["success"] = 2;
+			$response["success"] = 1;
 			echo json_encode($response);
 			BREAK;
 			
 		case "deleteTrip" :
 		
-			if( (isset($_GET['email'])) && (isset($_GET['trip_id'])) ) {
-				$trip_id = $_GET['trip_id'];
-				$user_id = $tripfunc->getUserIdByEmail($_GET['email']);
+			if( (isset($_POST['email'])) && (isset($_POST['trip_id'])) ) {
+				$trip_id = $_POST['trip_id'];
+				$user_id = $tripfunc->getUserIdByEmail($_POST['email']);
 				if($user_id){
 					$result = $tripfunc->removeTrip($trip_id,$user_id);
 					$response["success"] = 5;
@@ -98,9 +99,9 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 
 		case "addComment" :
 			
-			$comment_message = $_GET['comment_message'];
-			$trip_id = $_GET['trip_id'];
-			$user_id = $_GET['user_id'];
+			$comment_message = $_POST['comment_message'];
+			$trip_id = $_POST['trip_id'];
+			$user_id = $_POST['user_id'];
 			
 			$result = $tripfunc->addComment($comment_message, $trip_id, $user_id);
 			if($result){

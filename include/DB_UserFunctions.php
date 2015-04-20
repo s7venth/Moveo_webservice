@@ -37,8 +37,11 @@ class DB_UserFunctions {
 		
         // verifier si l'ajout a été un succès 
         if ($result) {
-			$a = mail('sylvain91130@hotmail.fr', 'Mon Sujet', 'http://127.0.0.1/Moveo_webservice/validation.php?key='.$validation_key_to_send.'&id=42');
-			if($a) echo "ok";else echo "non ok";
+			$user_id = $this->pdo->query("SELECT user_id 
+										 FROM user 
+										 WHERE user_email = '$email'");
+			$user_id = $user_id->fetch();
+			$a = mail($email, 'Activation de votre compte Moveo', 'Pour activer votre compte Moveo cliquer sur le lien suivant : http://127.0.0.1/Moveo_webservice/validation.php?key='.$validation_key_to_send.'&id='.$user_id['user_id']);
 			return true;
         } else {
 			return false;

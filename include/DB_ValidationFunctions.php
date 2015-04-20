@@ -23,15 +23,29 @@ class DB_ValidationFunctions {
 	}
 
     public function validateUserAccompt($key, $id){
-		echo "KEY avant : ".$key;
+
 		$key = sha1($key);
-		echo "KEY après : ".$key;
+
 		$result = $this->pdo->query("UPDATE user
 									 SET access_id = '2',user_password_temp = ''
 									 WHERE user_id = '$id'
 									 AND user_password_temp = '$key'
 									");
 		$this->closeDataBase();
+		if($result){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	public function checkAccessId($id){
+
+		$result = $this->pdo->query("SELECT access_id
+									 FROM user
+									 WHERE user_id = '$id'
+									 AND access_id = '1'
+									");
 		if($result){
 			return true;
 		}else{

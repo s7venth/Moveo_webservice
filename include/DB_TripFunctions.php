@@ -32,7 +32,7 @@ class DB_TripFunctions {
      */
     public function addTrip($country, $city, $description, $user_id) {
         
-        $result = $this->pdo->exec("INSERT INTO trip(trip_country, trip_city, trip_description, trip_created_at, user_id) 
+        $result = $this->pdo->exec("INSERT INTO trip(trip_name, trip_country, trip_description, trip_created_at, user_id) 
 									VALUES('$country', '$city', '$description', now(),'$user_id')");
 		
         // verifier si l'ajout a été un succes 
@@ -88,8 +88,8 @@ class DB_TripFunctions {
      */
     public function getTenTrips() {
         
-        $result = $this->pdo->query("SELECT trip_country,trip_city,trip_description,trip_created_at,user_name,user_firstname 
-									 FROM trip,user 
+        $result = $this->pdo->query("SELECT trip_id, trip_name, trip_country, trip_description, trip_created_at, user_last_name, user_first_name 
+									 FROM trip, user 
 									 WHERE  trip.user_id = user.user_id 
 									 ORDER BY rand() 
 									 LIMIT 10");
@@ -110,7 +110,7 @@ class DB_TripFunctions {
      */
     public function getTrip($trip_id) {
         
-        $result = $this->pdo->query("SELECT trip,id, trip_country ,trip_city, trip_description, trip_created_at, user_name,user_firstname 
+        $result = $this->pdo->query("SELECT trip,id, trip_name, trip_country, trip_description, trip_created_at, user_name,user_firstname 
 									 FROM trip,user
 									 WHERE  trip.user_id = user.user_id");
 		$result = $result->fetch();
