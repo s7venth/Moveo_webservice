@@ -46,6 +46,7 @@ class DB_ValidationFunctions {
 									 WHERE user_id = '$id'
 									 AND access_id = '1'
 									");
+		$result = $result->fetch();
 		if($result){
 			return true;
 		}else{
