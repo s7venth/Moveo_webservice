@@ -62,13 +62,15 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 		
 			$result = $tripfunc->getTenTrips();
 			foreach($result as $row){
-				 $response['trip'][] = array(  'trip_id' => $row['trip_id'],
+				 $response['trip'][] = array('trip_id' => $row['trip_id'],
 										   'trip_name' => $row['trip_name'],
 										'trip_country' => $row['trip_country'],
 								    'trip_description' => $row['trip_description'],
 								     'trip_created_at' => $row['trip_created_at'],
-							        'user_last_name' => $row['user_last_name'],
-								         'user_first_name' => $row['user_first_name']
+							          'user_last_name' => $row['user_last_name'],
+								     'user_first_name' => $row['user_first_name'],
+									   'comment_count' => $row['comment_count'],
+										 'photo_count' => $row['photo_count']
 								 );
 			}
 			$response["success"] = 1;
