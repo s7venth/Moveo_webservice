@@ -5,8 +5,6 @@ class DB_FriendFunctions {
 	protected $db;
     protected $pdo;
 	
-	
-	
     // Constructeur
     function __construct() {
         require 'include/DB_Connect.php';
@@ -88,7 +86,8 @@ class DB_FriendFunctions {
 		");
 		
         $result = $result->fetchAll();
-
+		
+		// Verifier si la requête a récupérer la liste d'amis
         if ($result) {
 			return $result;
         } else {
@@ -108,6 +107,7 @@ class DB_FriendFunctions {
 									 ");
 		$result = $result->fetch();
 		
+		// Vérifier si la requête a récupérer l'ami
         if($result) {
             // l'utilisateur existe
             return $result;

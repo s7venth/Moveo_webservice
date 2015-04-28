@@ -18,7 +18,8 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
     // Verification des TAGS
 	switch ($tag){
-		case 'login':
+		
+		case 'login': // Se connecter à l'application (Renvoie les informations de l'utilisateur)
 		
 			// les informations des champs "email" et "mot de passe" du formulaire de connexion
 			$email = $_POST['email'];
@@ -47,7 +48,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 					echo json_encode($response);
 				}
 			}else{
-				// l'utilisateur n'existe pas : echo json avec error = 1
+				// l'utilisateur n'existe pas : envoyer un objet json avec un message d'erreur
 				$response["error"] = 1;
 				$response["error_msg"] = "L'email ou le mot de passe est incorrect";
 				echo json_encode($response);
@@ -101,15 +102,9 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				echo json_encode($response);
 			} 
 			BREAK;
-			
-		case 'validate': 
-			
-			$id_user= $_POST['id_user'];
-			$id_key= $_POST['key'];
-			// A SUIVRE !!!!
-			BREAK;
 		
-		case 'addDialog' :
+		case 'addDialog' : // ajouter un message avec l'expéditeur et le récepteur 
+		
 			$message = $_POST['message'];
 			$user_id = $_POST['user_id'];
 			$other_user_id = $_POST['other_user_id'];
@@ -126,11 +121,36 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				echo json_encode($response);
 			}
 			BREAK;
+		
+		case 'forgetPassword' :
+			$user_email = $_POST['user_email'];
 			
+			// Si l'utilisateur existe il faut lui envoyer un mail avec le nouveau mot de passe 
+			if($userFunc->isUserExisted($user_email)){
+				
+				$result = $userFunc->generateNewPassword($user_email);
+				
+				if($result){
+					$response["success"] = 1;
+					$response["message"] = "L'email à été envoyer";
+					echo json_encode($response);
+				}else{
+					$response["error"] = 1;
+					$response["message"] = "Erreur lors de l'envoie du mail";
+					echo json_encode($response);
+				}
+			}else{
+				$response["error"] = 2;
+				$response["message"] = "Cette adresse email n'existe pas";
+				echo json_encode($response);
+			}
+			BREAK;
+		
 		default : 
+			// le tag n'existe pas 
 			echo "Requête invalide";
     }
 } else {
-    echo "Accès refusé";
+    echo "Accès refusé"; // le tag n'est pas spécifié 
 }
 ?>

@@ -7,7 +7,8 @@
 // Attention utiliser GET pour verifier directement en HTTP et utiliser POST pour l'application
 // Verification des requêtes sous la forme de GET 
 if (isset($_GET['tag']) && $_GET['tag'] != '') {
-    // RECUPERER LE TAG
+    
+	// RECUPERATION DU TAG
     $tag = $_GET['tag'];
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
@@ -19,6 +20,8 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 
     // Verification des TAGS
 	switch ($tag){
+		
+		// AJOUTER UN AMI
 		case 'addFriend':
 		
 			// les informations des champs "email" et "mot de passe" du formulaire de connexion
@@ -39,7 +42,8 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 				echo json_encode($response);
 			} 
 			BREAK;
-			
+		
+		// RECUPERER LES DEMANDES D'AMIS + LA LISTE D'AMIS
 		case 'getFriendsList': 
         
 			$user_id = $_GET['user_id'];
@@ -54,6 +58,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			echo json_encode($response);
 			BREAK;
 			
+		// ACCEPTER UN AMI 
 		case 'acceptFriend': 
 			$friend_id = $_GET['friend_id'];
 			$user_id = $_GET['user_id'];
@@ -72,7 +77,8 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 				echo json_encode($response);
 			} 
 			BREAK;
-			
+		
+		// SUPPRIMER UN AMI
 		case 'removeFriend': 
 			$friend_id = $_GET['friend_id'];
 			$user_id = $_GET['user_id'];
@@ -94,7 +100,9 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			} 
 			BREAK;
 			
+		// RECUPERATION DES INFORMATIONS D'UN AMI
 		case 'getFriend': 
+		
 			$friend_id = $_GET['friend_id'];
 			
 			$result = $friendFunc->getFriend($friend_id);
@@ -123,9 +131,10 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 			BREAK;
 			
 		default : 
+			// le tag n'existe pas 
 			echo "Requête invalide";
     }
 } else {
-    echo "Accès refusé";
+    echo "Accès refusé"; // le tag n'est pas spécifié 
 }
 ?>

@@ -34,6 +34,7 @@ if (isset($_GET['key']) && $_GET['key'] != '' && isset($_GET['id']) && $_GET['id
 	
 	
 } else {
-    echo "Accès refusé";
+    echo "Accès refusé"; // le tag n'est pas spécifié 
 }
 ?>
+

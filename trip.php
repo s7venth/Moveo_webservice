@@ -21,18 +21,17 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 		case "addTrip" :
 		
-			if(isset($_POST['country'])&&isset($_POST['city'])&&isset($_POST['email'])){
+			if(isset($_POST['user_id'])&&isset($_POST['trip_name'])&&isset($_POST['trip_country'])){
 				
 				// Les champs obligatoires
-				$country = $_POST['country'];
-				$city = $_POST['city'];
-				$email = $_POST['email'];
+				$user_id = $_POST['user_id'];
+				$trip_country = $_POST['trip_country'];
+				$trip_name = $_POST['trip_name'];
 				
 				// Les champs optionnels	
 				$description = isset($_POST['description'])?$_POST['description']:"";
 				
-				// Recuperer l'id de l'utilisateur grace à son adresse mail
-				$user_id = $tripfunc->getUserIdByEmail($email);
+				// Récupérer l'identifiant de l'utilisateur grâce à son adresse mail
 				if ($user_id) {
 					$trip = $tripfunc->addTrip($country,$city,$description,$user_id);
 						if ($trip) {
@@ -53,28 +52,54 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				}
 			}else{
 				$response["error"] = 3;
-				$response["error_msg"] = "Les informations sur le pays et la ville du voyage ainsi que l'email de l'utilisateur sont obligatoires.";
+				$response["error_msg"] = "Paramètre(s) manquant(s) ou erroné(s)";
 				echo json_encode($response);
 			}
 			BREAK;
 			
-		case "getTenTrips" :
-		
-			$result = $tripfunc->getTenTrips();
+		case "getMyTripsList" :
+			$user_id = $_GET['user_id'];
+			$result = $tripfunc->getTripList($user_id);
+			
 			foreach($result as $row){
 				 $response['trip'][] = array('trip_id' => $row['trip_id'],
 										   'trip_name' => $row['trip_name'],
 										'trip_country' => $row['trip_country'],
 								    'trip_description' => $row['trip_description'],
 								     'trip_created_at' => $row['trip_created_at'],
-							          'user_last_name' => $row['user_last_name'],
-								     'user_first_name' => $row['user_first_name'],
 									   'comment_count' => $row['comment_count'],
 										 'photo_count' => $row['photo_count']
 								 );
 			}
 			$response["success"] = 1;
 			echo json_encode($response);
+			BREAK;
+		
+		case "getTenTrips" :
+		
+			$result = $tripfunc->getTenTrips();
+			
+			if($result){
+				foreach($result as $row){
+					 $response['trip'][] = array('trip_id' => $row['trip_id'],
+											   'trip_name' => $row['trip_name'],
+											'trip_country' => $row['trip_country'],
+										'trip_description' => $row['trip_description'],
+										 'trip_created_at' => $row['trip_created_at'],
+										  'user_last_name' => $row['user_last_name'],
+										 'user_first_name' => $row['user_first_name'],
+										   'comment_count' => $row['comment_count'],
+											 'photo_count' => $row['photo_count']
+									 );
+				}
+				$response["success"] = 1;
+				$response["message"] = " Récupération des 10 voyages [OK]"
+				echo json_encode($response);
+			}else{
+				$response["error"] = 1;
+				$response["message"] = " Erreur lors de la récupération de la liste de voyages aléatoires"
+				echo json_encode($response);
+			}
 			BREAK;
 			
 		case "deleteTrip" :
@@ -84,43 +109,53 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				$user_id = $tripfunc->getUserIdByEmail($_POST['email']);
 				if($user_id){
 					$result = $tripfunc->removeTrip($trip_id,$user_id);
-					$response["success"] = 5;
+					$response["success"] = 1;
 					$response["error_msg"] = "le voyage a été supprimé";
 					echo json_encode($response);
 				}else{
-					$response["error"] = 4;
+					$response["error"] = 1;
 					$response["error_msg"] = "Erreur lors de la suppression du voyage";
 					echo json_encode($response);
 				}	
 			}else{
-				$response["error"] = 5;
-				$response["error_msg"] = "Paramètre manquant";
+				$response["error"] = 2;
+				$response["error_msg"] = "Paramètre(s) manquant(s) ou erroné(s)";
 				echo json_encode($response);
 			}
 			BREAK;
 
 		case "addComment" :
 			
-			$comment_message = $_POST['comment_message'];
-			$trip_id = $_POST['trip_id'];
-			$user_id = $_POST['user_id'];
-			
-			$result = $tripfunc->addComment($comment_message, $trip_id, $user_id);
-			if($result){
-				$response["success"] = 6;
-				$response["error_msg"] = "Le commentaire a bien été ajouté";
-				echo json_encode($response);
+			if(isset($_POST['comment_message']) && isset($_POST['trip_id']) && isset($_POST['user_id'])){
+				
+				$comment_message = $_POST['comment_message'];
+				$trip_id = $_POST['trip_id'];
+				$user_id = $_POST['user_id'];
+				
+				$result = $tripfunc->addComment($comment_message, $trip_id, $user_id);
+				if($result){
+					$response["success"] = 1;
+					$response["error_msg"] = "Le commentaire a bien été ajouté";
+					echo json_encode($response);
+				}else{
+					$response["error"] = 1;
+					$response["error_msg"] = "Erreur lors de l'ajout du commentaire";
+					echo json_encode($response);	
+				}
+				
 			}else{
-				$response["error"] = 5;
-				$response["error_msg"] = "Erreur lors de l'ajout du commentaire";
-				echo json_encode($response);	
+				$response["error"] = 2;
+				$response["error_msg"] = "Paramètre(s) manquant(s) ou erroné(s)";
+				echo json_encode($response);
 			}
+			
 			BREAK;
 			
 		default : 
+			// le tag n'existe pas 
 			echo "Requête invalide";
-	}
-}else{
-	echo "Accès refusé";
+    }
+} else {
+    echo "Accès refusé"; // le tag n'est pas spécifié 
 }
 ?>

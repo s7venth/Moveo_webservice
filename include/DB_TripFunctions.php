@@ -35,7 +35,7 @@ class DB_TripFunctions {
         $result = $this->pdo->exec("INSERT INTO trip(trip_name, trip_country, trip_description, trip_created_at, user_id) 
 									VALUES('$country', '$city', '$description', now(),'$user_id')");
 		
-        // verifier si l'ajout a été un succes 
+        // verifier si l'ajout a été un succès 
         if ($result) {
 			return true;
         } else {
@@ -50,9 +50,12 @@ class DB_TripFunctions {
      */
     public function getTripList($user_id) {
         
-        $result = $this->pdo->query("SELECT trip_country,trip_city,trip_description,trip_created_at 
-									 FROM trip 
-									 WHERE user_id = '$user_id'");
+        $result = $this->pdo->query("SELECT t.trip_id, trip_name, trip_country, trip_description, trip_created_at, count(DISTINCT comment_id) as comment_count, count(DISTINCT photo_id) as photo_count 			 
+                                     FROM (trip as t) 
+										LEFT JOIN comment ON (t.trip_id = comment.trip_id)
+										LEFT JOIN photo ON (t.trip_id = photo.trip_id) 
+									 WHERE t.user_id = '$user_id'
+									 GROUP BY t.trip_id ");
 		$result = $result->fetchAll();
         // verifier si la requête a réaliser la recuperation a été un succès 
         if ($result) {
@@ -83,7 +86,7 @@ class DB_TripFunctions {
     }
 	
 	 /**
-     * Récupérer 10 voyages de façon aléatoires
+     * Récupérer 10 voyages de façon aléatoires avec leurs informations (identifiant, nom, pays, description, date de création, l'auteur, nombre de commentaire et de photos)
      * @return une liste regroupant 10 voyages aléatoires, faux s'il la recuperation a échoué 
      */
     public function getTenTrips() {
@@ -176,8 +179,8 @@ class DB_TripFunctions {
      * Verifier si l'utilisateur existe
 	 * @param email
 	 * retourne l'id s'il existe, faux s'il n'existe pas 
-     *
-    public function getUserIdByEmail($email) {
+     */
+    public function checkId($user_id) { // A MODIFIER 
         $result = $this->pdo->query("SELECT user_id 
 									 FROM user 
 									 WHERE user_mail = '$email'");
@@ -191,7 +194,7 @@ class DB_TripFunctions {
             return false;
         }
     }
-	*/
+	
 	
 	/**
 	 * Ajouter un commentaire

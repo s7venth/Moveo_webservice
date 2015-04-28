@@ -169,6 +169,12 @@ class DB_UserFunctions {
         }
     }
 	
+	/*
+	* ajoute un message avec les identifiants de l'expéditeur et le récepteur
+	* @param $user_id l'identifiant de l'utilisateur (L'expéditeur)
+	* @param $other_user_id l'identifiant de la personne à qui l'utilisateur envoi un message (récepteur)
+	* @param $message Le message que souhaite envoyer l'expéditeur 
+	*/ 
 	public function addDialog($user_id, $other_user_id, $message){
 		$result = $this->pdo->exec("INSERT INTO dialog(user_id, other_user_id, message, sent_datetime, is_read) 
 									VALUES('$user_id', '$other_user_id','$message', now(), '1')");
@@ -179,6 +185,33 @@ class DB_UserFunctions {
         } else {
 			return false;
         }
+	}
+	
+	/**
+	* génère un nouveau mot de passe puis l'envoi à l'utilisateur
+	* @param $user_email l'adresse email de l'utilisateur
+	* @return vrai si le mot de passe a été ajouté et envoyer sinon faux
+	*/
+	public function generateNewPassword($user_email){
+		
+		$password = substr(sha1(rand()),10,10);
+		$hash = $this->hashSSHA($password);
+        $encrypted_password = $hash["encrypted"]; // mot de passe crypté
+        $salt = $hash["salt"]; // clé pour la sécurité du mot de passe
+		
+		$result = $this->pdo->exec("UPDATE user
+									SET user_password = '$encrypted_password',user_security_key = '$salt'
+									WHERE user_email = '$user_email'");
+
+        if ($result) {
+			$a = mail($user_email,"Votre nouveau mot de passe pour votre compte MOVEO","Voici votre nouveau mot de passe : ".$password);
+			if($a)return true;
+			else return false;
+        } else {
+			return false;
+		}
+		
+		
 	}
 	
 	
