@@ -7,7 +7,7 @@ class DB_TripFunctions {
 	
     // constructeur
     function __construct() {
-        require 'include/DB_Connect.php';
+        require_once('include/DB_Connect.php');
         // se connecter à la base de données
 		$this->db= new DB_Connect();
 		$this->pdo = $this->db->getPdo();
@@ -30,10 +30,10 @@ class DB_TripFunctions {
 	 * @param user_id : l'identifiant de l'utilisateur
      * @return vrai si le voyage a été ajouté, faux s'il ne l'a pas été
      */
-    public function addTrip($country, $city, $description, $user_id) {
+    public function addTrip($country, $name, $description, $user_id) {
         
         $result = $this->pdo->exec("INSERT INTO trip(trip_name, trip_country, trip_description, trip_created_at, user_id) 
-									VALUES('$country', '$city', '$description', now(),'$user_id')");
+									VALUES('$name', '$country', '$description', now(),'$user_id')");
 		
         // verifier si l'ajout a été un succès 
         if ($result) {
@@ -55,9 +55,9 @@ class DB_TripFunctions {
 										LEFT JOIN comment ON (t.trip_id = comment.trip_id)
 										LEFT JOIN photo ON (t.trip_id = photo.trip_id) 
 									 WHERE t.user_id = '$user_id'
-									 GROUP BY t.trip_id ");
+									 GROUP BY t.trip_id");
 		$result = $result->fetchAll();
-        // verifier si la requête a réaliser la recuperation a été un succès 
+        // verifier si la requête a réaliser la récuperation a été un succès 
         if ($result) {
 			return $result;
         } else {

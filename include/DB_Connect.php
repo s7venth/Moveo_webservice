@@ -26,7 +26,7 @@ class DB_Connect {
 
     // Fermer la connexion vers la base de données
     public function close() {
-        mysql_close();
+        $this->pdo = NULL;
     }
 
 }

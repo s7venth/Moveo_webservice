@@ -9,7 +9,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
     // RECUPERER LE TAG
     $tag = $_POST['tag'];
 
-	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
+	// IMPORTER LES FONCTIONS DE LA CLASSE DB_UserFunctions
 	require_once 'include/DB_UserFunctions.php';
 	$userFunc = new DB_UserFunctions();
 
@@ -27,11 +27,9 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 			// verifier si l'utilisateur existe
 			$user = $userFunc->getUserByEmailAndPassword($email, $password);
-			if ($user) {
-				$user_id = $userFunc->registerLoginDate($user['user_id']);
-				if($user_id){
-					// L'utilisateur existe : echo json avec success = 1
-					$response["success"] = 1;
+			if($user) {
+				$result = $userFunc->registerLoginDate($user['user_id']);
+				if($result){
 					$response["user"]["user_id"] = $user["user_id"];
 					$response["user"]["user_last_name"] = $user["user_last_name"];
 					$response["user"]["user_first_name"] = $user["user_first_name"];
@@ -41,18 +39,46 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 					$response["user"]["user_country"] = $user["user_country"];
 					$response["user"]["user_city"] = $user["user_city"];
 					$response["user"]["access_id"] = $user["access_id"];
-					echo json_encode($response);
-				}else{
+					
+					$userFunc = $userFunc->closeDataBase();
+					
+					//Récupération des voyages de la personne connectée
+					//IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
+					require_once 'include/DB_TripFunctions.php';
+					$tripFunc = new DB_TripFunctions();
+					
+					$tripsList = $tripFunc->getTripList($user["user_id"]);
+					if($tripsList) {
+						foreach($tripsList as $trips) {
+							$response["trip"][] = array (
+								"trip_id" => $trips["trip_id"],
+								"trip_name" => $trips["trip_name"],
+								"trip_country" => $trips["trip_country"],
+								"trip_description" => $trips["trip_description"],
+								"trip_created_at" => $trips["trip_created_at"],
+								"comment_count" => $trips['comment_count'],
+								"photo_count" => $trips['photo_count']
+							);
+						}
+						//Si la récupération de l'utilisateur et de ses voyages a été un succès
+						$response["success"] = 1;
+						echo json_encode($response);
+					} else {
+						$response["error"] = 3;
+						$response["message"] = "La récupération des voyages a échoué.";
+						echo json_encode($response);
+					}
+				} else {
 					$response["error"] = 2;
 					$response["message"] = "Erreur lors de l'enregistrement de la date de connexion ";
 					echo json_encode($response);
 				}
-			}else{
+			} else {
 				// l'utilisateur n'existe pas : envoyer un objet json avec un message d'erreur
 				$response["error"] = 1;
-				$response["error_msg"] = "L'email ou le mot de passe est incorrect";
+				$response["message"] = "L'email ou le mot de passe est incorrect";
 				echo json_encode($response);
-			} 
+			}
 			BREAK;
 			
 		case 'register': 

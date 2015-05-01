@@ -7,20 +7,22 @@ class DB_UserFunctions {
 	
     //constucteur
     function __construct() {
-        require 'include/DB_Connect.php';
-        // se connecter à la base de données
-		$this->db= new DB_Connect();
+        require_once('include/DB_Connect.php');
+        //Se connecter à la base de données
+		$this->db = new DB_Connect();
 		$this->pdo = $this->db->getPdo();
     }
 
     // fermer la base de données
     function __destruct() {
-        $db = null;
+        $db = NULL;
     }
 	
 	public function closeDataBase(){
-		$db = null;
+		$this->db = $this->db->close();
+		$this->db = NULL;
 	}
+	
 
     /**
      * Enregistrer un nouveau utilisateur 
@@ -35,11 +37,9 @@ class DB_UserFunctions {
         $result = $this->pdo->exec("INSERT INTO user(user_last_name, user_first_name, user_email, user_password, user_security_key, user_password_temp, user_subscribe_date, access_id) 
 									VALUES('$name', '$firstName', '$email', '$encrypted_password', '$salt', '$validation_key', now(), '1')");
 		
-        // verifier si l'ajout a été un succès 
+        // Vérifie si l'ajout a été un succès 
         if ($result) {
-			$user_id = $this->pdo->query("SELECT user_id 
-										 FROM user 
-										 WHERE user_email = '$email'");
+			$user_id = $this->pdo->query("SELECT user_id FROM user WHERE user_email = '$email'");
 			$user_id = $user_id->fetch();
 			$a = mail($email, 'Activation de votre compte Moveo', 'Pour activer votre compte Moveo cliquer sur le lien suivant : http://127.0.0.1/Moveo_webservice/validation.php?key='.$validation_key_to_send.'&id='.$user_id['user_id']);
 			return true;

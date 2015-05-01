@@ -21,7 +21,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 		case "addTrip" :
 		
-			if(isset($_POST['user_id'])&&isset($_POST['trip_name'])&&isset($_POST['trip_country'])){
+			if(isset($_POST['user_id']) && isset($_POST['trip_name']) && isset($_POST['trip_country'])){
 				
 				// Les champs obligatoires
 				$user_id = $_POST['user_id'];
@@ -33,7 +33,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				
 				// Récupérer l'identifiant de l'utilisateur grâce à son adresse mail
 				if ($user_id) {
-					$trip = $tripfunc->addTrip($country,$city,$description,$user_id);
+					$trip = $tripfunc->addTrip($trip_country, $trip_name, $description, $user_id);
 						if ($trip) {
 							// Si le voyage a été enregistrer 
 							$response["success"] = 1;
@@ -42,7 +42,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 						} else {
 							// Si le voyage n'a pas pu être enregistrer donc envoyer un message d'erreur
 							$response["error"] = 1;
-							$response["error_msg"] = "le voyage n'a pas été enregistré";
+							$response["error_msg"] = "Le voyage n'a pas été enregistré";
 							echo json_encode($response);
 						}
 				} else {
@@ -58,17 +58,17 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			BREAK;
 			
 		case "getMyTripsList" :
-			$user_id = $_GET['user_id'];
+			$user_id = $_POST['user_id'];
 			$result = $tripfunc->getTripList($user_id);
 			
 			foreach($result as $row){
 				 $response['trip'][] = array('trip_id' => $row['trip_id'],
-										   'trip_name' => $row['trip_name'],
-										'trip_country' => $row['trip_country'],
-								    'trip_description' => $row['trip_description'],
-								     'trip_created_at' => $row['trip_created_at'],
-									   'comment_count' => $row['comment_count'],
-										 'photo_count' => $row['photo_count']
+											 'trip_name' => $row['trip_name'],
+											 'trip_country' => $row['trip_country'],
+											 'trip_description' => $row['trip_description'],
+											 'trip_created_at' => $row['trip_created_at'],
+											 'comment_count' => $row['comment_count'],
+											 'photo_count' => $row['photo_count']
 								 );
 			}
 			$response["success"] = 1;
@@ -82,22 +82,22 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			if($result){
 				foreach($result as $row){
 					 $response['trip'][] = array('trip_id' => $row['trip_id'],
-											   'trip_name' => $row['trip_name'],
-											'trip_country' => $row['trip_country'],
-										'trip_description' => $row['trip_description'],
-										 'trip_created_at' => $row['trip_created_at'],
-										  'user_last_name' => $row['user_last_name'],
-										 'user_first_name' => $row['user_first_name'],
-										   'comment_count' => $row['comment_count'],
-											 'photo_count' => $row['photo_count']
+												 'trip_name' => $row['trip_name'],
+												 'trip_country' => $row['trip_country'],
+												 'trip_description' => $row['trip_description'],
+												 'trip_created_at' => $row['trip_created_at'],
+												 'user_last_name' => $row['user_last_name'],
+												 'user_first_name' => $row['user_first_name'],
+												 'comment_count' => $row['comment_count'],
+												 'photo_count' => $row['photo_count']
 									 );
 				}
 				$response["success"] = 1;
-				$response["message"] = " Récupération des 10 voyages [OK]"
+				$response["message"] = " Récupération des 10 voyages [OK]";
 				echo json_encode($response);
 			}else{
 				$response["error"] = 1;
-				$response["message"] = " Erreur lors de la récupération de la liste de voyages aléatoires"
+				$response["message"] = " Erreur lors de la récupération de la liste de voyages aléatoires";
 				echo json_encode($response);
 			}
 			BREAK;
