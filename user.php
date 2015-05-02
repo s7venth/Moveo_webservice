@@ -49,23 +49,26 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 					
 					$tripsList = $tripFunc->getTripList($user["user_id"]);
 					if($tripsList) {
+						
 						foreach($tripsList as $trips) {
-							$response["trip"][] = array (
+							$response["trip"][] = array(
 								"trip_id" => $trips["trip_id"],
 								"trip_name" => $trips["trip_name"],
 								"trip_country" => $trips["trip_country"],
 								"trip_description" => $trips["trip_description"],
 								"trip_created_at" => $trips["trip_created_at"],
-								"comment_count" => $trips['comment_count'],
-								"photo_count" => $trips['photo_count']
+								"comment_count" => $trips["comment_count"],
+								"photo_count" => $trips["photo_count"]
 							);
+							
 						}
+
 						//Si la récupération de l'utilisateur et de ses voyages a été un succès
 						$response["success"] = 1;
 						echo json_encode($response);
 					} else {
-						$response["error"] = 3;
-						$response["message"] = "La récupération des voyages a échoué.";
+						$response["success"] = 2;
+						$response["message"] = "L'utilisateur n'a pas de voyages";
 						echo json_encode($response);
 					}
 				} else {

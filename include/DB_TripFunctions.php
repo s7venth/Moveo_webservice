@@ -91,16 +91,14 @@ class DB_TripFunctions {
      */
     public function getTenTrips() {
         
-        $result = $this->pdo->query("
-			SELECT t.trip_id, trip_name, trip_country, trip_description, trip_created_at, user_last_name, user_first_name,count(DISTINCT comment_id) as comment_count, count(DISTINCT photo_id) as photo_count 
-			FROM (trip as t) 
-				LEFT JOIN user ON (t.user_id = user.user_id) 
-				LEFT JOIN comment ON (t.trip_id = comment.trip_id)
-				LEFT JOIN photo ON (t.trip_id = photo.trip_id) 
-			GROUP BY t.trip_id 
-			ORDER BY rand() 
-			LIMIT 10 
-			");
+        $result = $this->pdo->query("SELECT t.trip_id, trip_name, trip_country, trip_description, trip_created_at, user_last_name, user_first_name,count(DISTINCT comment_id) as comment_count, count(DISTINCT photo_id) as photo_count 
+                            		 FROM (trip as t) 
+                            			LEFT JOIN user ON (t.user_id = user.user_id) 
+                            			LEFT JOIN comment ON (t.trip_id = comment.trip_id)
+                            			LEFT JOIN photo ON (t.trip_id = photo.trip_id) 
+                            		 GROUP BY t.trip_id 
+                            		 ORDER BY rand() 
+                            		 LIMIT 10");
 		$result = $result->fetchAll();
 		
          // vérifier si la requête a réaliser la suppression
