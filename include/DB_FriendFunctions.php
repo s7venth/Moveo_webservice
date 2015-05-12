@@ -7,7 +7,7 @@ class DB_FriendFunctions {
 	
     // Constructeur
     function __construct() {
-        require 'include/DB_Connect.php';
+        require_once 'include/DB_Connect.php';
         // se connecter à la base de données
 		$this->db= new DB_Connect();
 		$this->pdo = $this->db->getPdo();
@@ -80,9 +80,9 @@ class DB_FriendFunctions {
      */
     public function getFriendsList($user_id) {
         $result = $this->pdo->query("
-		SELECT user_last_name, user_first_name, is_accepted FROM user, is_friend WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id'
+		SELECT is_friend.friend_id as id, user_last_name, user_first_name, is_accepted FROM user, is_friend WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id'
 		UNION
-		SELECT user_last_name, user_first_name,is_accepted FROM user, is_friend WHERE user.user_id=is_friend.user_id AND is_friend.friend_id ='$user_id'
+		SELECT is_friend.user_id id, user_last_name, user_first_name,is_accepted FROM user, is_friend WHERE user.user_id=is_friend.user_id AND is_friend.friend_id ='$user_id'
 		");
 		
         $result = $result->fetchAll();

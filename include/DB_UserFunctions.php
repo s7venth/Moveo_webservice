@@ -52,10 +52,13 @@ class DB_UserFunctions {
      * Mettre à jour les informations de l'utilisateur 
      * return vrai si la mise à jour a réussi ou faux si elle a échoué
      */
-    public function updateUser($user_id, $birthday, $country, $city, $password) {
-        $result = $this->pdo->exec("UPDATE user
-									SET user_birthday = '$birthday'
+    public function updateUser($user_id, $user_last_name, $user_first_name, $birthday, $country, $city) {
+        $result = $this->pdo->query("UPDATE user
+									SET user_last_name = '$user_last_name'
+                                    AND user_first_name = '$user_first_name'
+                                    AND user_birthday = '$birthday'
 									AND user_country = '$country'
+                                    AND user_city = '$city'
 									WHERE user_id='$user_id'");
 		
         // verifier si la mise à jour a été un succes 
@@ -169,15 +172,15 @@ class DB_UserFunctions {
         }
     }
 	
-	/*
-	* ajoute un message avec les identifiants de l'expéditeur et le récepteur
-	* @param $user_id l'identifiant de l'utilisateur (L'expéditeur)
-	* @param $other_user_id l'identifiant de la personne à qui l'utilisateur envoi un message (récepteur)
-	* @param $message Le message que souhaite envoyer l'expéditeur 
-	*/ 
-	public function addDialog($user_id, $other_user_id, $message){
-		$result = $this->pdo->exec("INSERT INTO dialog(user_id, other_user_id, message, sent_datetime, is_read) 
-									VALUES('$user_id', '$other_user_id','$message', now(), '1')");
+	/**
+	 * ajoute un message avec les identifiants de l'expéditeur et le récepteur
+	 * @param $user_id l'identifiant de l'utilisateur (L'expéditeur)
+	 * @param $other_user_id l'identifiant de la personne à qui l'utilisateur envoi un message (récepteur)
+	 * @param $message Le message que souhaite envoyer l'expéditeur 
+	 */ 
+	public function addDialog($user_id, $recipient_id, $message){
+		$result = $this->pdo->exec("INSERT INTO dialog(user_id, recipient_id, message, sent_datetime, read_by_recipient) 
+									VALUES('$user_id', '$recipient_id','$message', now(), '0')");
 									
 		// verifier si la requête a réalisé l'ajout
         if ($result) {
@@ -186,6 +189,72 @@ class DB_UserFunctions {
 			return false;
         }
 	}
+	
+    /**
+     * Recupére tous les messages qu'a reçu l'utilisateur
+     * @param $user_id l'identifiant de l'utilisateur
+     * 
+     */
+	public function getInbox($user_id){
+		$result = $this->pdo->query("SELECT recipient_id, user_last_name as recipient_last_name, user_first_name as recipient_first_name, message, sent_datetime, read_by_recipient
+                                     FROM dialog, user
+                                     WHERE recipient_id = '$user_id'
+                                     AND user.user_id = dialog.user_id
+                                     AND remove_by_recipient = 0");
+
+        $result = $result->fetchAll();
+        
+        if($result) {
+            return $result;
+        } else {
+            return false;
+        }
+	}
+
+    /**
+     * Recupére tous les messages d'envoi de l'utilisateur
+     * @param $user_id l'identifiant de l'utilisateur
+     * 
+     */
+    public function getSendbox($user_id){ 
+        $result = $this->pdo->query("SELECT recipient_id, user_last_name as recipient_last_name, user_first_name as recipient_first_name, message, sent_datetime
+                                     FROM dialog d, user u
+                                     WHERE u.user_id = d.recipient_id
+                                     AND d.user_id = 1
+                                     AND remove_by_user = 0");
+
+        $result = $result->fetchAll();
+        
+        if($result) {
+            return $result;
+        } else {
+            return false;
+        }
+    }
+
+    public function readMessage($message_id){ 
+        $result = $this->pdo->query("UPDATE dialog
+                                     SET read_by_recipient = 1
+                                     WHERE dialog_id = '$message_id'");
+        
+        if($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function removeMessageInbox($message_id){ 
+        $result = $this->pdo->query("UPDATE dialog
+                                     SET read_by_recipient = 1
+                                     WHERE dialog_id = '$message_id'");
+        
+        if($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 	
 	/**
 	* génère un nouveau mot de passe puis l'envoi à l'utilisateur

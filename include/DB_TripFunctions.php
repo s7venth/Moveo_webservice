@@ -89,13 +89,14 @@ class DB_TripFunctions {
      * Récupérer 10 voyages de façon aléatoires avec leurs informations (identifiant, nom, pays, description, date de création, l'auteur, nombre de commentaire et de photos)
      * @return une liste regroupant 10 voyages aléatoires, faux s'il la recuperation a échoué 
      */
-    public function getTenTrips() {
+    public function getTenTrips($user_id) {
         
         $result = $this->pdo->query("SELECT t.trip_id, trip_name, trip_country, trip_description, trip_created_at, user_last_name, user_first_name,count(DISTINCT comment_id) as comment_count, count(DISTINCT photo_id) as photo_count 
                             		 FROM (trip as t) 
                             			LEFT JOIN user ON (t.user_id = user.user_id) 
                             			LEFT JOIN comment ON (t.trip_id = comment.trip_id)
                             			LEFT JOIN photo ON (t.trip_id = photo.trip_id) 
+									 WHERE t.user_id != '$user_id'
                             		 GROUP BY t.trip_id 
                             		 ORDER BY rand() 
                             		 LIMIT 10");
@@ -116,9 +117,10 @@ class DB_TripFunctions {
      */
     public function getTrip($trip_id) {
         
-        $result = $this->pdo->query("SELECT trip,id, trip_name, trip_country, trip_description, trip_created_at, user_name,user_firstname 
-									 FROM trip,user
-									 WHERE  trip.user_id = user.user_id");
+        $result = $this->pdo->query("SELECT trip_id, trip_name, trip_country, trip_description, trip_created_at, user_last_name, user_first_name, trip.user_id 
+                                     FROM trip, user 
+                                     WHERE trip.user_id = user.user_id 
+                                     AND trip_id = '$trip_id' ");
 		$result = $result->fetch();
         // verifier si la requête a réaliser la recuperation 
         if ($result) {
@@ -136,7 +138,7 @@ class DB_TripFunctions {
      */
     public function getPlaceList($trip_id) {
         
-        $result = $this->pdo->query("SELECT place_id, place_name, place_adresse,category_id
+        $result = $this->pdo->query("SELECT place_id, place_name, place_address ,place_description, category_id
 									 FROM place
 									 WHERE  trip_id = '$trip_id'");
 		$result = $result->fetchAll();
@@ -211,6 +213,26 @@ class DB_TripFunctions {
         }
 									 
 	}
+
+    /**
+     * Ajouter un commentaire
+     * @param $comment_message 
+     * @param $trip_id 
+     * @return vrai si l'ajout à réussi, faux s'il n'a pas réussi
+     */
+    public function getCommentList($trip_id){
+        $result = $this->pdo->query("SELECT comment_id, comment_message, comment_added_datetime, trip_id, user_id
+                                     FROM comment
+                                     WHERE trip_id = '$trip_id'
+                                     ");
+        $result = $result->fetchAll();
+        if ($result) {
+            return $result;
+        } else {
+            return false;
+        }
+                                     
+    }
 }
 
 ?>

@@ -12,7 +12,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 	// IMPORTER LES FONCTIONS DE LA CLASSE DB_TripFunctions
 	require_once 'include/DB_TripFunctions.php';
-	$tripfunc = new DB_TripFunctions();
+	$tripFunc = new DB_TripFunctions();
 
     // réponse en Array
     $response = array("tag" => $tag, "success" => 0, "error" => 0);
@@ -33,7 +33,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				
 				// Récupérer l'identifiant de l'utilisateur grâce à son adresse mail
 				if ($user_id) {
-					$trip = $tripfunc->addTrip($trip_country, $trip_name, $description, $user_id);
+					$trip = $tripFunc->addTrip($trip_country, $trip_name, $description, $user_id);
 						if ($trip) {
 							// Si le voyage a été enregistrer 
 							$response["success"] = 1;
@@ -59,7 +59,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 		case "getMyTripsList" :
 			$user_id = $_POST['user_id'];
-			$result = $tripfunc->getTripList($user_id);
+			$result = $tripFunc->getTripList($user_id);
 			
 			foreach($result as $row){
 				 $response['trip'][] = array('trip_id' => $row['trip_id'],
@@ -76,8 +76,10 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			BREAK;
 		
 		case "getTenTrips" :
-		
-			$result = $tripfunc->getTenTrips();
+			
+			$userId = $_POST['user_id'];
+			$result = $tripFunc->getTenTrips($userId);
+			 
 			
 			if($result){
 				foreach($result as $row){
@@ -101,14 +103,84 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				echo json_encode($response);
 			}
 			BREAK;
-			
+
+		case "getTrip" :
+
+			$trip_id = $_POST['trip_id'];
+
+			$result = $tripFunc->getTrip($trip_id);
+
+			if($result){
+
+				$successPlace = false;
+				$successComment = false;
+
+				$response["success"] = 1;
+				$response['trip']['trip_id'] = $result['trip_id'];
+				$response['trip']['trip_name'] = $result['trip_name'];
+				$response['trip']['trip_country'] = $result['trip_country'];
+				$response['trip']['trip_description'] = $result['trip_description'];
+				$response['trip']['trip_created_at'] = $result['trip_created_at'];
+				$response['trip']['user_last_name'] = $result['user_last_name'];
+				$response['trip']['user_first_name'] = $result['user_first_name'];
+				$response['trip']['user_id'] = $result['user_id'];
+				
+				$resultPlace = $tripFunc->getPlaceList($trip_id);
+
+				if($resultPlace){
+					$successPlace = true;
+					foreach ($resultPlace as $place) {
+
+						$response['place'][] = array('place_id' => $place['place_id'] ,
+													 'place_name' => $place['place_name'] ,
+													 'place_address' => $place['place_address'] ,
+													 'place_description' => $place['place_description'] ,
+													 'category_id' => $place['category_id'] );
+					}									
+				}
+
+				$resultComment = $tripFunc->getCommentList($trip_id);
+
+				if($resultComment){
+					$successComment = true;
+					foreach ($resultComment as $comment) {
+
+						$response['comment'][] = array('comment_id' => $comment['comment_id'] ,
+													   'comment_message' => $comment['comment_message'] ,
+													   'comment_added_datetime' => $comment['comment_added_datetime'] ,
+													   'trip_id' => $comment['trip_id'],
+													   'user_id' => $comment['user_id'] );
+					}									
+				}
+
+				if($successPlace && $successComment){
+					$response["success"] = 1;
+				}else if($successPlace){
+					$response["success"] = 2;
+					$response["message"] = "L'utilisateur n'a pas de commentaire";
+				}else if($successComment){
+					$response["success"] = 3;
+					$response["message"] = "L'utilisateur n'a pas de lieu";
+				}else{
+					$response["success"] = 4;
+					$response["message"] = "L'utilisateur n'a ni lieu ni commentaire";
+				}
+				
+				echo json_encode($response);
+
+			}else{
+				$response['error'] = 1;
+				$response['message'] = "erreur lors de la recuperation du voyage";
+				echo json_encode($response);
+			}
+			BREAK;
 		case "deleteTrip" :
 		
 			if( (isset($_POST['email'])) && (isset($_POST['trip_id'])) ) {
 				$trip_id = $_POST['trip_id'];
-				$user_id = $tripfunc->getUserIdByEmail($_POST['email']);
+				$user_id = $tripFunc->getUserIdByEmail($_POST['email']);
 				if($user_id){
-					$result = $tripfunc->removeTrip($trip_id,$user_id);
+					$result = $tripFunc->removeTrip($trip_id,$user_id);
 					$response["success"] = 1;
 					$response["error_msg"] = "le voyage a été supprimé";
 					echo json_encode($response);
@@ -132,7 +204,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				$trip_id = $_POST['trip_id'];
 				$user_id = $_POST['user_id'];
 				
-				$result = $tripfunc->addComment($comment_message, $trip_id, $user_id);
+				$result = $tripFunc->addComment($comment_message, $trip_id, $user_id);
 				if($result){
 					$response["success"] = 1;
 					$response["error_msg"] = "Le commentaire a bien été ajouté";
@@ -150,7 +222,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			}
 			
 			BREAK;
-			
+
 		default : 
 			// le tag n'existe pas 
 			echo "Requête invalide";
