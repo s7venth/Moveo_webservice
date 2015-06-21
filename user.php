@@ -262,6 +262,8 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 		
 			
 			$user_id = $_GET['message_id'];
+			$recipient_id = $_GET['recipient_id'];
+			$message = $_GET['message'];
 			
 			$result = $userFunc->addDialog($user_id, $recipient_id, $message);
 			

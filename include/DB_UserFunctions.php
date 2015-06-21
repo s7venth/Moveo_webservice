@@ -220,7 +220,7 @@ class DB_UserFunctions {
         $result = $this->pdo->query("SELECT recipient_id, user_last_name as recipient_last_name, user_first_name as recipient_first_name, message, sent_datetime
                                      FROM dialog d, user u
                                      WHERE u.user_id = d.recipient_id
-                                     AND d.user_id = 1
+                                     AND d.user_id = '$user_id'
                                      AND remove_by_user = 0");
 
         $result = $result->fetchAll();
@@ -232,10 +232,12 @@ class DB_UserFunctions {
         }
     }
 
-    public function readMessage($message_id){ 
+    public function readMessage($user_id, $recipient_id, $sent_datetime){
         $result = $this->pdo->query("UPDATE dialog
                                      SET read_by_recipient = 1
-                                     WHERE dialog_id = '$message_id'");
+                                     WHERE user_id = '$user_id'
+                                     AND recipient_id = '$recipient_id'
+                                     AND sent_datetime = '$sent_datetime'");
         
         if($result) {
             return true;
@@ -283,23 +285,6 @@ class DB_UserFunctions {
 		
 	}
 
-    /**
-     * Function that return an array of users.
-     * It is a function especialy used by the admin
-     * @return array|bool|PDOStatement the array of users or false if there is a problem.
-     */
-    public function getUsers(){
-        $result = $this->pdo->query("SELECT * FROM user");
-
-        $result = $result->fetchAll();
-
-        if($result) {
-            return $result;
-        } else {
-            return false;
-        }
-    }
-	
     /**
      * Crypter le mot de passe
      * @param password
