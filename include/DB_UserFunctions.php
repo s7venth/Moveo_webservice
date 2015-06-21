@@ -282,7 +282,23 @@ class DB_UserFunctions {
 		
 		
 	}
-	
+
+    /**
+     * Function that return an array of users.
+     * It is a function especialy used by the admin
+     * @return array|bool|PDOStatement the array of users or false if there is a problem.
+     */
+    public function getUsers(){
+        $result = $this->pdo->query("SELECT * FROM user");
+
+        $result = $result->fetchAll();
+
+        if($result) {
+            return $result;
+        } else {
+            return false;
+        }
+    }
 	
     /**
      * Crypter le mot de passe
