@@ -45,8 +45,8 @@ class DB_FriendFunctions {
     public function acceptFriend($user_id, $friend_id) {
         $result = $this->pdo->exec("UPDATE is_friend 
 									SET is_accepted = '1' 
-									WHERE user_id='$user_id' 
-									AND friend_id='$friend_id'");
+									WHERE (user_id = '$user_id' AND friend_id = '$friend_id')
+                                    OR (friend_id = '$user_id' AND user_id = '$friend_id')");
 		
         // vérifier si la requête a mis à jour l'acceptation
         if ($result) {
@@ -62,8 +62,8 @@ class DB_FriendFunctions {
      */
     public function removeFriend($user_id, $friend_id) {
         $result = $this->pdo->exec("DELETE FROM is_friend 
-									WHERE user_id='$user_id' 
-									AND friend_id='$friend_id'");
+									WHERE (user_id = '$user_id' AND friend_id = '$friend_id')
+                                    OR (friend_id = '$user_id' AND user_id = '$friend_id')");
 		
         // verifier si la requête a réaliser la suppression 
         if ($result) {
@@ -80,9 +80,13 @@ class DB_FriendFunctions {
      */
     public function getFriendsList($user_id) {
         $result = $this->pdo->query("
-		SELECT is_friend.friend_id as id, user_last_name, user_first_name, is_accepted FROM user, is_friend WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id'
+		SELECT is_friend.friend_id as id, user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city, is_accepted 
+		FROM user, is_friend
+		WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id'
 		UNION
-		SELECT is_friend.user_id id, user_last_name, user_first_name,is_accepted FROM user, is_friend WHERE user.user_id=is_friend.user_id AND is_friend.friend_id ='$user_id'
+		SELECT is_friend.user_id as id, user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city, is_accepted 
+		FROM user, is_friend 
+		WHERE user.user_id=is_friend.user_id AND is_friend.friend_id ='$user_id'
 		");
 		
         $result = $result->fetchAll();
@@ -101,7 +105,7 @@ class DB_FriendFunctions {
 	 * return Les informations d'un autre utilisateur
      */
     public function getFriend($friend_id){
-        $result = $this->pdo->query("SELECT user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city, user_favorite_country, user_favorite_city 
+        $result = $this->pdo->query("SELECT user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city 
 									 FROM user 
 									 WHERE user_id = '$friend_id'
 									 ");

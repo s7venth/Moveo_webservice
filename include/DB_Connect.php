@@ -7,7 +7,7 @@ class DB_Connect {
     // Constructeur
     function __construct() {
         try {
-			$conn = new PDO('mysql:host=localhost;dbname=moveo_database', 'root', '');
+			$conn = new PDO('mysql:host=mysql.hostinger.fr;dbname=u843730206_moveo', 'u843730206_vince', 'ameliebarre');
 			$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 		catch(Exception $e) {
