@@ -82,7 +82,7 @@ class DB_FriendFunctions {
         $result = $this->pdo->query("
 		SELECT is_friend.friend_id as id, user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city, is_accepted 
 		FROM user, is_friend
-		WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id'
+		WHERE user.user_id=friend_id AND is_friend.user_id ='$user_id' AND is_accepted = 1
 		UNION
 		SELECT is_friend.user_id as id, user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city, is_accepted 
 		FROM user, is_friend 
@@ -96,6 +96,23 @@ class DB_FriendFunctions {
 			return $result;
         } else {
 			return false;
+        }
+    }
+
+
+    public function checkFriend($user_id, $friend_id){
+        $result = $this->pdo->query("SELECT friend_id
+                                     FROM is_friend
+                                     WHERE is_accepted = 0
+                                     AND(is_friend.user_id = '$user_id' AND is_friend.friend_id = '$friend_id')
+                                     OR (is_friend.user_id = '$friend_id' AND is_friend.friend_id = '$user_id')");
+                
+        $result = $result->fetch();
+                
+        if ($result) {
+            return true;
+        } else {
+            return false;
         }
     }
 	

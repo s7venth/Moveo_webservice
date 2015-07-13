@@ -30,7 +30,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 			// verifier si l'utilisateur existe
 			$result = $friendFunc->addFriend($user_id, $friend_id);
-			if ($result != false) {
+			if ($result) {
 				// L'utilisateur existe : echo json avec success = 1
 				$response["success"] = 1;
 				$response["message"] = "Ami enregistré avec succès";

@@ -111,12 +111,18 @@ class DB_UserFunctions {
         }
     }
 	
-	public function getUserByLastNameAndFirstName($query){
-		$result = $this->pdo->query("SELECT user_id, user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city
-									 FROM user	
-									 WHERE user_last_name LIKE '%$query%'
-									 OR user_first_name LIKE '%$query%'
-									 ");
+	public function getUserByLastNameAndFirstName($query, $user_id){
+		$result = $this->pdo->query("SELECT user.user_id, user_last_name, user_first_name, user_link_avatar, COUNT( trip_id ) AS trip_count
+                                  FROM user, trip
+                                  WHERE (
+                                  user_last_name LIKE '%$query%'
+                                  OR user_first_name LIKE '%$query%'
+                                  )
+                                  AND user.user_id != '$user_id'
+                                  AND user.user_id = trip.user_id
+                                  GROUP BY user.user_id
+                                  LIMIT 0 , 30
+									              ");
 									 
 		$result = $result->fetchAll();
 	
@@ -189,11 +195,12 @@ class DB_UserFunctions {
 	 * @param $user_id
 	 * return Les informations d'un autre utilisateur
      */
-    public function getOtherUser($otherUser_id) {
-        $result = $this->pdo->query("SELECT user_last_name, user_first_name, user_link_avatar, user_country
-									 FROM user 
-									 WHERE user_id = '$otherUser_id'");
-		$result = $result->fetch();
+    public function getOtherUser($otherUserId) {
+        $result = $this->pdo->query("SELECT user_last_name, user_first_name, user_birthday, user_link_avatar, user_country, user_city, access_id, COUNT(trip_id) as trip_count
+                                     FROM user, trip
+                                     WHERE user.user_id = '$otherUserId'
+                                     AND user.user_id = trip.user_id");
+		    $result = $result->fetch();
 		
         if($result) {
             // l'utilisateur existe
@@ -227,8 +234,7 @@ class DB_UserFunctions {
 			else return false;
         } else {
 			return false;
-		}
-		
+		}	
 		
 	}
 
@@ -259,11 +265,25 @@ class DB_UserFunctions {
         }
 
     }
+
+    public function changeAccess($user_id, $access){
+        $result = $this->pdo->exec("UPDATE user
+                                    SET access_id = '$access'
+                                    WHERE user_id = '$user_id' 
+                                  ");
+        if($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 	
 
     public function checkPassword($user_id, $password){
         $checked = false;
-        $result = $this->pdo->query("SELECT user_password, user_security_key FROM user WHERE user_id = '$user_id'");
+        $result = $this->pdo->query("SELECT user_password, user_security_key 
+                                     FROM user 
+                                     WHERE user_id = '$user_id'");
         $result = $result->fetch();
         if ($result > 0) {
             $key = $result['user_security_key'];
@@ -326,6 +346,18 @@ class DB_UserFunctions {
         
         if($result) {
             return $result;
+        } else {
+            return false;
+        }
+    }
+    
+    public function deleteAccount($user_id){
+        $result = $this->pdo->query("DELETE 
+                                     FROM user 
+                                     WHERE user_id = '$user_id'");
+        
+        if($result) {
+            return true;
         } else {
             return false;
         }

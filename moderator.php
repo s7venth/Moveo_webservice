@@ -1,100 +1,55 @@
 <?php
 /**
- * Chaque requête sera identifier par TAG
- * Les réponses seront données en JSON
+ * Chaque requï¿½te sera identifier par TAG
+ * Les rï¿½ponses seront donnï¿½es en JSON
  */
 // Attention utiliser GET pour verifier directement en HTTP et utiliser POST pour l'appli
 // Verification des requetes sous la forme de GET 
-if (isset($_GET['tag']) && $_GET['tag'] != '') {
+if (isset($_POST['tag']) && $_POST['tag'] != '') {
     // RECUPERER LE TAG
-    $tag = $_GET['tag'];
+    $tag = $_POST['tag'];
 
     // IMPORTER LES FONCTIONS DE LA CLASSE DB_moderatorFunctions
-    require_once 'include/DB_moderatorFunctions.php';
+    require_once 'include/DB_ModeratorFunctions.php';
     $moderatorFunc = new DB_moderatorFunctions();
 
-    // Tableau associatif qui sera envoyé au JSON
+    // Tableau associatif qui sera envoyï¿½ au JSON
     $response = array("tag" => $tag, "success" => 0, "error" => 0);
 
     // Verification des TAGS
     switch ($tag) {
 
-        case 'login': // Se connecter à l'application (Renvoie les informations de l'moderateur)
+        case 'login': // Se connecter ï¿½ l'application (Renvoie les informations du moderateur)
 
             // les informations des champs "email" et "mot de passe" du formulaire de connexion
-            $email = $_GET['email'];
-            $password = $_GET['password'];
+            $email = $_POST['email'];
+            $password = $_POST['password'];
 
             // verifier si le moderateur existe
             $moderator = $moderatorFunc->getmoderatorByEmailAndPassword($email, $password);
 
             if ($moderator) {
 
-                if ($moderator["access_id"] == '1') {
-                    $response["error"] = 3;
-                    $response["message"] = "le compte n'est pas activé";
-                } else if ($moderator["access_id"] == '3') {
-                    $response["error"] = 4;
-                    $response["message"] = "L'application est en maintenance";
-                } else if ($moderator["access_id"] == '4') {
-                    $response["error"] = 5;
-                    $response["message"] = "Le compte est bloqué par l'administrateur";
-                } else {
+                $moderatorId = $moderator["moderator_id"];
 
-                    $moderatorId = $moderator["moderator_id"];
+                $response["moderator"]["moderator_id"] = $moderatorId;
+                $response["moderator"]["moderator_name"] = $moderator["moderator_name"];
+                $response["moderator"]["moderator_email"] = $moderator["moderator_email"];
+                $response["moderator"]["is_admin"] = $moderator["is_admin"];
 
-                    $successTrip = false;
-                    $successFriend = false;
-                    $successInbox = false;
-                    $successSendbox = false;
-
-                    $response["moderator"]["moderator_id"] = $moderatorId;
-                    $response["moderator"]["moderator_name"] = $moderator["moderator_name"];
-                    $response["moderator"]["moderator_email"] = $moderator["moderator_email"];
-                    $response["moderator"]["access_id"] = $moderator["access_id"];
-                }
                 echo json_encode($response);
             } else {
-                // le modérateur n'existe pas : envoyer un objet json avec un message d'erreur
+                // le modï¿½rateur n'existe pas : envoyer un objet json avec un message d'erreur
                 $response["error"] = 1;
-                $response["message"] = "L'email ou le mot de passe est incorrect";
+                $response["message"] = "L'email ou le mot de passe est incorrect"+$email+ " et "+$password;
                 echo json_encode($response);
-            }
-            BREAK;
-
-        case 'register':
-
-            $name = $_GET['name'];
-            $email = $_GET['email'];
-            $password = $_GET['password'];
-
-            // Verifier si l'moderateur existe
-            if ($moderatorFunc->isModeratorExisted($email)) {
-                // Le moderateur existe donc envoyer un message d'erreur
-                $response["error"] = 2;
-                $response["error_msg"] = "L'moderateur existe deja";
-                echo json_encode($response);
-            } else {
-                // L'moderateur n'existe pas donc l'enregistrer
-                $moderator = $moderatorFunc->storeModerator($name, $email, $password);
-                if ($moderator) {
-                    // Si le moderateur a été enregistrer
-                    $response["success"] = 1;
-                    $response["error_msg"] = "Enregistrement réussi";
-                    echo json_encode($response);
-                } else {
-                    // Si le moderateur n'a pas pu être enregistrer donc envoyer un message d'erreur
-                    $response["error"] = 1;
-                    $response["error_msg"] = "le moderateur n'a pas été enregistré";
-                    echo json_encode($response);
-                }
             }
             BREAK;
 
         case 'updateProfil':
 
-            $moderator_id = $_GET['moderator_id'];
-            $moderator_name = $_GET['moderator_name'];
+            $moderator_id = $_POST['moderator_id'];
+            $moderator_name = $_POST['moderator_name'];
 
             $result = $moderatorFunc->updatemoderator($moderator_id, $moderator_name);
 
@@ -110,7 +65,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 
         case 'getOthermoderator':
 
-            $otherModerator_id = $_GET['otherModerator_id'];
+            $otherModerator_id = $_POST['otherModerator_id'];
 
             $result = $moderatorFunc->getOtherModerator($otherModerator_id);
             if ($result != false) {
@@ -123,19 +78,51 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
                 echo json_encode($response);
             }
             BREAK;
+        case 'getUsers':
 
-        case 'addDialog' : // ajouter un message avec l'expéditeur et le récepteur
+            $result = $moderatorFunc->getUsers();
+            if ($result) {
+                $response["success"] = 1;
+                $response["user"]["user_id"] = $user["user_id"];
+                $response["user"]["user_last_name"] = $user["user_last_name"];
+                $response["user"]["user_first_name"] = $user["user_first_name"];
+                $response["user"]["user_birthday"] = $user["user_birthday"];
+                $response["user"]["user_email"] = $user["user_email"];
+                $response["user"]["user_country"] = $user["user_country"];
+                $response["user"]["user_city"] = $user["user_city"];
+                $response["user"]["access_id"] = $user["access_id"];
+                // Recuperation de la photo de l'utilisateur en base 64
+                if($user["user_link_avatar"]){
+                    $data = @file_get_contents($user["user_link_avatar"]);
+                    if($data != false){
+                        $picture = base64_encode($data);
+                    }else{
+                        $picture = "";
+                    }
+                }else{
+                    $picture = "";
+                }
+                $response["user"]["avatar"] = $picture;
+                echo json_encode($response);
+            } else {
+                $response["error"] = 1;
+                $response["error_msg"] = "Erreur lors de la recuperation des utilisateurs";
+                echo json_encode($response);
+            }
+            BREAK;
+
+        case 'addDialog' : // ajouter un message avec l'expï¿½diteur et le rï¿½cepteur
 
 
-            $moderator_id = $_GET['moderator_id'];
-            $recipient_id = $_GET['recipient_id'];
-            $message = $_GET['message'];
+            $moderator_id = $_POST['moderator_id'];
+            $recipient_id = $_POST['recipient_id'];
+            $message = $_POST['message'];
 
             $result = $moderatorFunc->addDialog($moderator_id, $recipient_id, $message);
 
             if ($result) {
                 $response["success"] = 1;
-                $response["message"] = "Le message a été ajouté avec succès";
+                $response["message"] = "Le message a ete ajoute avec succes";
                 echo json_encode($response);
             } else {
                 $response["error"] = 1;
@@ -144,18 +131,18 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
             }
             BREAK;
 
-        case 'readMessage' : // ajouter un message avec l'expéditeur et le récepteur
+        case 'readMessage' : // lire un message avec l'expï¿½diteur et le rï¿½cepteur
 
 
-            $moderator_id = $_GET['message_id'];
-            $recipient_id = $_GET['recipient_id'];
-            $message = $_GET['message'];
+            $moderator_id = $_POST['message_id'];
+            $recipient_id = $_POST['recipient_id'];
+            $message = $_POST['message'];
 
             $result = $moderatorFunc->addDialog($moderator_id, $recipient_id, $message);
 
             if ($result) {
                 $response["success"] = 1;
-                $response["message"] = "Le message a été ajouté avec succès";
+                $response["message"] = "Le message a ï¿½tï¿½ ajoutï¿½ avec succï¿½s";
                 echo json_encode($response);
             } else {
                 $response["error"] = 1;
@@ -165,7 +152,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
             BREAK;
 
         case 'forgetPassword' :
-            $moderator_email = $_GET['moderator_email'];
+            $moderator_email = $_POST['moderator_email'];
 
             // Si le moderateur existe il faut lui envoyer un mail avec le nouveau mot de passe
             if ($moderatorFunc->ismoderatorExisted($moderator_email)) {
@@ -174,7 +161,7 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 
                 if ($result) {
                     $response["success"] = 1;
-                    $response["message"] = "L'email à été envoyé";
+                    $response["message"] = "L'email ï¿½ ï¿½tï¿½ envoyï¿½";
                     echo json_encode($response);
                 } else {
                     $response["error"] = 1;
@@ -190,9 +177,9 @@ if (isset($_GET['tag']) && $_GET['tag'] != '') {
 
         default :
             // le tag n'existe pas
-            echo "Requête invalide";
+            echo "Requete invalide";
     }
 } else {
-    echo "Accès refusé"; // le tag n'est pas spécifié 
+    echo "Acces refuse"; // le tag n'est pas spï¿½cifiï¿½
 }
 ?>

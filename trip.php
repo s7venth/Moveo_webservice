@@ -25,19 +25,26 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				
 				// Les champs obligatoires
 				$user_id = $_POST['user_id'];
-				$country = $_POST['trip_country'];
-				$name = $_POST['trip_name'];
+				$country = addslashes($_POST['trip_country']);
+				$name = addslashes($_POST['trip_name']);
 				$cover = $_POST['cover'];
-				
+				setlocale(LC_TIME, "fr_FR");
+				$date = date('Y-m-d H:i:s');
+
 				// Les champs optionnels	
-				$description = isset($_POST['description'])?$_POST['description']:"";
+				$description = isset($_POST['description'])?addslashes($_POST['description']):"";
+
+				$photo_link= "img/".substr(sha1(rand()),10,10).".jpg";
 			
-				$trip = $tripFunc->addTrip($country, $name, $description, $cover, $user_id);
+				$photo =  $tripFunc->base64_to_jpeg("data:image/jpg;base64,".$cover, $photo_link);
+			
+				$trip = $tripFunc->addTrip($country, $name, $description, $date, $photo_link, $user_id);
 
 				if ($trip) {
 					// Si le voyage a été enregistrer 
 					$response["success"] = 1;
-					$response["message"] = "Enregistrement du voyage réussi";
+					$response["trip_id"] = $trip;
+					$response["date"] = "".$date;
 				} else {
 					// Si le voyage n'a pas pu être enregistrer donc envoyer un message d'erreur
 					$response["error"] = 1;
@@ -53,6 +60,23 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 			BREAK;
 			
+		case "modifyDescription" :
+			$trip_id = $_POST['trip_id'];
+			$description = addslashes($_POST['description']);
+
+			$result = $tripFunc->modifyDescription($trip_id, $description);
+
+			if($result){
+				$response["success"] = 1;
+			}else{
+				$response["error"] = 1;
+				$response["message"] = "Erreur lors de la modification de la description";
+			}
+
+			echo json_encode($response);
+			BREAK;
+		
+		// RECUPERER LES VOYAGES DE L'UTILISATEUR 
 		case "getTripList" :
 			$user_id = $_POST['user_id'];
 			$result = $tripFunc->getTripList($user_id);
@@ -60,7 +84,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			if($result){
 				foreach($result as $row){
 
-					if($row["link_cover"]){
+					/*if($row["link_cover"]){
 						$data = @file_get_contents($row["link_cover"]);
 						if($data != false){
 							$picture = base64_encode($data);
@@ -69,14 +93,12 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 						}
 					}else{
 						$picture = "";
-					}
+					}*/
 
 					 $response['trip'][] = array('trip_id' => $row['trip_id'],
 												 'trip_name' => $row['trip_name'],
 												 'trip_country' => $row['trip_country'],
-												 'trip_description' => $row['trip_description'],
-												 'trip_created_at' => $row['trip_created_at'],
-												 'trip_cover' => $picture,
+												 'trip_cover' => $row["link_cover"],
 												 'comment_count' => $row['comment_count'],
 												 'photo_count' => $row['photo_count']
 									   			);
@@ -92,6 +114,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			}
 			BREAK;
 		
+		// RECUPERER 10 VOYAGES ALEATOIRE
 		case "getTenTrips" :
 			
 			$userId = $_POST['user_id'];
@@ -101,24 +124,22 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			if($result){
 				foreach($result as $row){
 
-					if($row["link_cover"]){
+					/*if($row["link_cover"]){
 						$data = @file_get_contents($row["link_cover"]);
 						if($data != false){
 							$picture = base64_encode($data);
 						}else{
-							$picture = "";
+							$picture = "null";
 						}
 
 					}else{
-						$picture = "";
-					}
+						$picture = "null";
+					}*/
 
 					$response['trip'][] = array('trip_id' => $row['trip_id'],
 												'trip_name' => $row['trip_name'],
 												'trip_country' => $row['trip_country'],
-												'trip_description' => $row['trip_description'],
-												'trip_created_at' => $row['trip_created_at'],
-												'trip_cover' => $picture,
+												'trip_cover' => $row["link_cover"],
 												'user_last_name' => $row['user_last_name'],
 												'user_first_name' => $row['user_first_name'],
 												'comment_count' => $row['comment_count'],
@@ -158,8 +179,10 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 					if($data != false){
 						$picture = base64_encode($data);
 					}else{
-						$picture = "";
+						$picture = "null";
 					}
+				}else{
+					$picture = "null";
 				}
 				$response['trip']['trip_cover'] = $picture;
 				
@@ -236,7 +259,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				
 				
 				
-
+/*
 				$resultComment = $tripFunc->getCommentList($trip_id);
 
 				if($resultComment){
@@ -264,7 +287,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 					}									
 				}else{
 					$response['comment'] = 0;
-				}
+				}*/
 				
 				echo json_encode($response);
 
@@ -277,24 +300,20 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 		case "deleteTrip" :
 		
-			if( (isset($_POST['user_id'])) && (isset($_POST['trip_id'])) ) {
-				$trip_id = $_POST['trip_id'];
-				$user_id = $_POST['user_id'];
-				if($user_id){
-					$result = $tripFunc->removeTrip($trip_id,$user_id);
-					$response["success"] = 1;
-					$response["error_msg"] = "le voyage a été supprimé";
-					echo json_encode($response);
-				}else{
-					$response["error"] = 1;
-					$response["error_msg"] = "Erreur lors de la suppression du voyage";
-					echo json_encode($response);
-				}	
+
+			$trip_id = $_POST['trip_id'];
+			$user_id = $_POST['user_id'];
+			$result = $tripFunc->removeTrip($trip_id, $user_id);
+
+			if($result){
+				$response["success"] = 1;
 			}else{
-				$response["error"] = 2;
-				$response["error_msg"] = "Paramètre(s) manquant(s) ou erroné(s)";
-				echo json_encode($response);
-			}
+				$response["error"] = 1;
+				$response["error_msg"] = "Erreur lors de la suppression du voyage";
+			}	
+
+			echo json_encode($response);
+
 			BREAK;
 
 		case "addComment" :
@@ -321,7 +340,25 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			echo json_encode($response);
 
 			BREAK;
-		
+        
+		case "modifyComment" :
+        
+            $comment_id = $_POST['comment_id'];
+            $comment_message = $_POST['message'];
+        
+            $result = $tripFunc->modifyComment($comment_message, $comment_id);
+            
+            if($result){
+                $response["success"] = 1;
+            }else{
+                $response["error"] = 1;
+                $response["message"] = "Erreur lors de la modification du message";
+            }
+
+            echo json_encode($response);
+
+            BREAK;
+        
 		case "deleteComment" :
 			
 			$comment_id = $_POST['comment_id'];
@@ -348,7 +385,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 				foreach ($result as $comment) {
 				
-					if($comment["user_link_avatar"]){
+					/*if($comment["user_link_avatar"]){
 						$data = @file_get_contents($comment["user_link_avatar"]);
 						if($data != false){
 							$picture = base64_encode($data);
@@ -357,7 +394,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 						}
 					}else{
 						$picture = "";
-					}
+					}*/
 
 					$response['comment'][] = array('comment_id' => $comment['comment_id'] ,
 													   'comment_message' => $comment['comment_message'] ,
@@ -366,7 +403,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 													   'user_id' => $comment['user_id'],
 													   'user_last_name' => $comment['user_last_name'],
 													   'user_first_name' => $comment['user_first_name'],
-													   'user_link_avatar' => $picture );
+													   'user_link_avatar' => $comment["user_link_avatar"] );
 
 				}
 
@@ -392,7 +429,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 				foreach ($result as $photo) {
 				
-					if($photo["photo_link"]){
+					/*if($photo["photo_link"]){
 						$data = @file_get_contents($photo["photo_link"]);
 						if($data != false){
 							$picture = base64_encode($data);
@@ -401,11 +438,11 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 						}
 					}else{
 						$picture = "";
-					}
+					}*/
 
 					$response['photo'][] = array('photo_id' => $photo['photo_id'] ,
 												 'photo_added_date' => $photo['photo_added_date'] ,
-												 'photo_link' => $picture );
+												 'photo_link' => $photo["photo_link"] );
 				}
 
 				$response["success"] = 1;
@@ -422,15 +459,16 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 		case "addPlace":
 			
 			$place_name = $_POST['place_name'];
-			$place_adresse = $_POST['place_adresse'];
+			$place_address = $_POST['place_address'];
 			$place_description = $_POST['place_description'];
 			$trip_id = $_POST['trip_id'];
 			$category_id = $_POST['category_id'];
 
-			$result = $tripFunc->addPlace($place_name, $place_adresse, $place_description, $trip_id, $category_id);
+			$result = $tripFunc->addPlace($place_name, $place_address, $place_description, $trip_id, $category_id);
 
 			if($result){
 				$response["success"] = 1;
+				$response["place_id"] = $result;
 			}else{
 				$response["error"] = 1;
 				$response["message"] = "Erreur lors de l'enregistrement des lieux'";
@@ -439,7 +477,44 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			echo json_encode($response);
 
 			break;
+        
+        case "modifyPlace":
+        
+            $place_name = $_POST['place_name'];
+            $place_address = $_POST['place_address'];
+			$place_description = $_POST['place_description'];
+            $place_id = $_POST['place_id'];
+        
+            $result = $tripFunc->modifyPlace($place_id, $place_name, $place_address, $place_description);
+        
+            if ($result) {
+				$response["success"] = 1;
+			} else {
+				$response["error"] = 1;
+				$response["message"] = "Erreur lors de la modification du lieu";
+			}
+        
+            echo json_encode($response);
 
+			break;
+        
+        case "deletePlace":
+            
+            $place_id = $_POST['place_id'];
+        
+            $result = $tripFunc->removePlace($place_id);
+            
+            if ($result) {
+				$response["success"] = 1;
+			} else {
+				$response["error"] = 1;
+				$response["message"] = "Erreur lors de la suppression du lieu";
+			}
+        
+            echo json_encode($response);
+
+			break;
+            
 		case "addPhoto":
 			
 			$photo_base_64 = $_POST['photo_base_64'];
@@ -466,6 +541,76 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 			break;
 
+		case "modifyCover" :
+
+			$trip_id = $_POST['trip_id'];
+
+			if($_POST['cover'] != "null" && $_POST['cover'] != ""){
+				$link_avatar = $tripFunc->getCover($trip_id);
+				if($link_avatar['link_cover'] == "" || $link_avatar['link_cover'] == null || $link_avatar['link_cover'] == "null" || $link_avatar == false){
+					// Si l'utilisateur n'as pas de chemin vers une photo on crée un nouveau chemin 
+					$link_cover = "img/".substr(sha1(rand()),10,10).".jpg";
+					$avatar =  $tripFunc->base64_to_jpeg("data:image/jpg;base64,".$_POST['cover'], $link_cover);
+					if(!$avatar){
+						$link_cover = "null"; 
+						$response["avatar"] = 0;
+					}
+				}else{
+					
+					$link_cover =  $link_avatar['link_cover'];
+					$avatar =  $tripFunc->base64_to_jpeg("data:image/jpg;base64,".$_POST['cover'], $link_cover);
+					// Si la création de la photo à echoué, le chemin est initialisé à vide
+					if(!$avatar){
+						$link_cover = "null"; 
+						$response["avatar"] = 0;
+					}
+
+				}
+			
+			}else{
+				$link_cover = null;
+			}
+
+			$result = $tripFunc->modifyCover($link_cover, $trip_id)	;
+            
+            if ($result) {
+				$response["success"] = 1;
+			} else {
+				$response["error"] = 1;
+				$response["message"] = "Erreur lors de la modification de la photo";
+			}
+            
+            echo json_encode($response);
+        
+			break;
+        
+        case "deletePhoto":
+            
+            $photo_id = $_POST['photo_id'];
+            
+            $link_photo = $tripFunc->getPhotoLink($photo_id);
+            
+            if($link_photo){
+                $delete_photo = unlink($link_photo);
+            }
+        
+            if($delete_photo){
+                $result = $tripFunc->deletePhoto($photo_id)	;
+                if($result){
+				    $response["success"] = 1;
+                }else{
+                    $response["error"] = 2;
+                    $response["message"] = "Erreur lors de la suppression de l'image de la base";
+                }
+            }else{
+                $response["error"] = 1;
+                $response["message"] = "Erreur lors de la suppression de l'image dans le repertoire";
+            }
+            
+            echo json_encode($response);
+        
+			break;
+        
 		case "toReportPhoto":
 
 			$photo_id = $_POST['photo_id'];

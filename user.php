@@ -34,11 +34,11 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 					$response["error"] = 3;
 					$response["message"] = "le compte n'est pas activé";
 				}
-				else if($user["access_id"] == '3'){
+				else if($user["access_id"] == '4'){
 					$response["error"] = 4;
 					$response["message"] = "L'application est en maintenance";
 				}
-				else if($user["access_id"] == '4'){
+				else if($user["access_id"] == '5'){
 					$response["error"] = 5;
 					$response["message"] = "Le compte est bloqué par un modérateur";
 				}else{
@@ -85,16 +85,16 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 							$successTrip = true;
 							foreach($tripsList as $trip) {
 
-								if($trip["link_cover"]){
+								/*if($trip["link_cover"]){
 									$data = @file_get_contents($trip["link_cover"]);
 									if($data != false){
 										$picture = base64_encode($data);
 									}else{
-										$picture = "";
+										$picture = "null";
 									}
 								}else{
-									$picture = "";
-								}
+									$picture = "null";
+								}*/
 								$response["trip"][] = array(
 									"trip_id" => $trip["trip_id"],
 									"trip_name" => $trip["trip_name"],
@@ -103,7 +103,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 									"trip_created_at" => $trip["trip_created_at"],
 									"comment_count" => $trip["comment_count"],
 									"photo_count" => $trip["photo_count"],
-									"trip_cover" => $picture
+									"trip_cover" => $trip["link_cover"]
 								);	
 							}
 						}else{
@@ -112,7 +112,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 						
 						// -------------RECUPERATION DES LIEUX-----------------
 						
-						$placesList = $tripFunc->getAllPlaces($user_id);
+						$placesList = $tripFunc->getAllPlaces($userId);
 						
 						$tripFunc = null;
 						
@@ -124,7 +124,9 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 										 'place_name' => $place['place_name'] ,
 										 'place_address' => $place['place_address'] ,
 										 'place_description' => $place['place_description'] ,
-										 'category_id' => $place['category_id'] );
+										 'category_id' => $place['category_id'],
+                                         'trip_id' => $place['trip_id']
+                                                            );
 							}
 						}else{
 							// Si la requête ne renvoie pas de lieu alors on initialise à 0
@@ -144,7 +146,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 						
 							foreach($friendList as $friend) {
 
-								if($friend["user_link_avatar"]){
+								/*if($friend["user_link_avatar"]){
 									$data = @file_get_contents($friend["user_link_avatar"]);
 									if($data != false){
 										$picture = base64_encode($data);
@@ -153,7 +155,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 									}
 								}else{
 									$picture = "";
-								}
+								}*/
 
 								$response["friend"][] = array(
 									"friend_id" => $friend["id"],
@@ -163,7 +165,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 									"friend_country" => $friend["user_country"],
 									"friend_city" => $friend["user_city"],
 									"is_accepted" => $friend["is_accepted"],
-									"friend_avatar" =>  $picture
+									"friend_avatar" =>  $friend["user_link_avatar"]
 								);
 							}
 						}else{
@@ -181,7 +183,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 							
 							foreach($inbox as $message) {
 								$response["inbox"][] = array(
-										"recipient_id" => $message["recipient_id"],
+										"user_id" => $message["user_id"],
 										"recipient_last_name" => $message["recipient_last_name"],
 										"recipient_first_name" => $message["recipient_first_name"],
 										"message" => $message["message"],
@@ -315,57 +317,92 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			BREAK;
 
 		case 'getOtherUser': 
-		
-			$otherUserId = $_POST['idOtherUser'];
-				
+			
+			require_once 'include/DB_TripFunctions.php';
+			require_once 'include/DB_FriendFunctions.php';
+
+			$otherUserId = $_POST['otherUserId'];
+			$userId = $_POST['userId'];
+
 			$result = $userFunc->getOtherUser($otherUserId);
 
 			if ($result) {
 				$response["success"] = 1;
-				$response["otherUser"]["user_name"] = $result["user_name"];
-				$response["otherUser"]["user_firstname"] = $result["user_firstname"];
-				$response["otherUser"]["user_link_avatar"] = $result["user_link_avatar"];
-				echo json_encode($response);
-			}else{
-				$response["error"] = 1;
-				$response["error_msg"] = "Erreur lors de la recuperation de l'utilisateur";
-				echo json_encode($response);
-			} 
+				$response["otherUser"]["last_name"] = $result["user_last_name"];
+				$response["otherUser"]["first_name"] = $result["user_first_name"];
+				$response["otherUser"]["birthday"] = $result["user_birthday"];
+				$response["otherUser"]["country"] = $result["user_country"];
+				$response["otherUser"]["city"] = $result["user_city"];
+				$response["otherUser"]["access_id"] = $result["access_id"];
+				$response["otherUser"]["trip_count"] = $result["trip_count"];
+				if($result["user_link_avatar"]){
+					$data = @file_get_contents($result["user_link_avatar"]);
+					if($data != false){
+						$picture = base64_encode($data);
+					}else{
+						$picture = "";
+					}
+				}else{
+					$picture = "";
+				}
+				$response["otherUser"]["link_avatar"] = $picture;
 
-			$tripFunc = new DB_TripFunctions();		
+				$userFunc = null;
+
+				$tripFunc = new DB_TripFunctions();		
 						// Récuperation des voyages
-						$tripsList = $tripFunc->getTripList($userId);
+						$tripsList = $tripFunc->getOtherUserTripList($otherUserId);
 						$tripFunc = null;
 						if($tripsList) {
-							$successTrip = true;
+
 							foreach($tripsList as $trip) {
 
-								if($trip["link_cover"]){
-									$data = @file_get_contents($trip["link_cover"]);
-									if($data != false){
-										$picture = base64_encode($data);
-									}else{
-										$picture = "";
-									}
+							if($row["link_cover"]){
+								$data = @file_get_contents($row["link_cover"]);
+								if($data != false){
+									$picture = base64_encode($data);
 								}else{
-									$picture = "";
+									$picture = "null";
 								}
-								$response["trip"][] = array(
-									"trip_id" => $trip["trip_id"],
-									"trip_name" => $trip["trip_name"],
-									"trip_country" => $trip["trip_country"],
-									"trip_description" => $trip["trip_description"],
-									"trip_created_at" => $trip["trip_created_at"],
-									"trip_cover" => $picture,
-									"comment_count" => $trip["comment_count"],
-									"photo_count" => $trip["photo_count"]
-								);	
+							}else{
+								$picture = "null";
 							}
-							echo json_encode($response);
+
+						$response['trip'][] = array('trip_id' => $row['trip_id'],
+													'trip_name' => $row['trip_name'],
+													'trip_country' => $row['trip_country'],
+													'trip_description' => $row['trip_description'],
+													'trip_created_at' => $row['trip_created_at'],
+													'trip_cover' => $picture,
+													'user_last_name' => $row['user_last_name'],
+													'user_first_name' => $row['user_first_name'],
+													'comment_count' => $row['comment_count'],
+													'photo_count' => $row['photo_count']
+										 			);
+							}
 
 						}else{
 							$response["trip"] = 0;
 						}
+
+					$friendFunc = new DB_FriendFunctions();	
+					$friendList = $friendFunc->checkFriend($userId, $otherUserId);	
+					$friendFunc = null;
+					if($friendList){
+						$response['invitation'] = 1;
+					}else{
+						$response['invitation'] = 0;
+					}
+
+
+			}else{
+				$response["error"] = 1;
+				$response["error_msg"] = "Erreur lors de la recuperation de l'utilisateur";
+
+			} 
+
+			
+			echo json_encode($response);
 
 			BREAK;
 		
@@ -496,7 +533,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			$password = $_POST['password'];
 			$new_password = $_POST['new_password'];
 
-			$result = $userFunc->checkPassword($user_id, $password, $new_password);
+			$result = $userFunc->checkPassword($user_id, $password);
 
 			if($result){
 				$result = $userFunc->changePassword($user_id, $new_password);
@@ -515,6 +552,45 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 			break;
 
+		case 'changeAccess':
+
+			$user_id = $_POST['userId'];
+			$access = $_POST['access'];
+			$password = $_POST['password'];
+			$result = $userFunc->checkPassword($user_id, $password);
+			if($result){
+				$accessResult = $userFunc->changeAccess($user_id, $access);
+
+				if($accessResult){
+					$response["success"] = 1;
+				}else{
+					$response["error"] = 2;
+					$response["message"] = "Une erreur s'est produite lors du changement d'état de l'access";
+				}
+			}else{
+				$response["error"] = 1;
+				$response["message"] = "Mot de passe incorrect";
+			}
+			echo json_encode($response);
+			BREAK;
+        
+        case "deleteAccount":
+            
+            $user_id = $_POST['userId'];
+            $password = $_POST['password'];
+        
+            $result = $userFunc->deleteAccount($user_id);
+        
+            if($result){
+					$response["success"] = 1;
+            }else{
+					$response["error"] = 1;
+					$response["message"] = "Une erreur s'est produite lors de la suppression du compte";
+            }
+        
+            echo json_encode($response);
+			BREAK;
+        
 		default : 
 			// le tag n'existe pas 
 			echo "Requête invalide";

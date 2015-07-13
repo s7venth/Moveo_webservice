@@ -14,6 +14,7 @@ class DB_Connect {
 			echo 'Erreur lors de la création de la base de données: ' . $e->getMessage();
 		}
 		$this->pdo = $conn;
+        
     }
 
     // Fermer fonction
