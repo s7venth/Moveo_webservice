@@ -78,31 +78,23 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
                 echo json_encode($response);
             }
             BREAK;
+
         case 'getUsers':
 
-            $result = $moderatorFunc->getUsers();
-            if ($result) {
+            $UsersList = $moderatorFunc->getUsers();
+            if($UsersList) {
                 $response["success"] = 1;
-                $response["user"]["user_id"] = $user["user_id"];
-                $response["user"]["user_last_name"] = $user["user_last_name"];
-                $response["user"]["user_first_name"] = $user["user_first_name"];
-                $response["user"]["user_birthday"] = $user["user_birthday"];
-                $response["user"]["user_email"] = $user["user_email"];
-                $response["user"]["user_country"] = $user["user_country"];
-                $response["user"]["user_city"] = $user["user_city"];
-                $response["user"]["access_id"] = $user["access_id"];
-                // Recuperation de la photo de l'utilisateur en base 64
-                if($user["user_link_avatar"]){
-                    $data = @file_get_contents($user["user_link_avatar"]);
-                    if($data != false){
-                        $picture = base64_encode($data);
-                    }else{
-                        $picture = "";
-                    }
-                }else{
-                    $picture = "";
-                }
-                $response["user"]["avatar"] = $picture;
+                foreach($UsersList as $user) {
+                    $response["user"][] = array(
+                        "user_id" => $user["user_id"],
+                        "user_last_name" => $user["user_last_name"],
+                        "user_first_name" => $user["user_first_name"],
+                        "user_birthday" => $user["user_birthday"],
+                        "user_email" => $user["user_email"],
+                        "user_country" => $user["user_country"],
+                        "user_city" => $user["user_city"]
+                    );
+                };
                 echo json_encode($response);
             } else {
                 $response["error"] = 1;

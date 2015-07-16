@@ -108,7 +108,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				echo json_encode($response);
 			}else{
 				$response["error"] = 1;
-				$response["message"] = "Erreur lors de la recuperation du voyage";
+				$response["message"] = "pas de voyage pour cet utilisateur";
 				echo json_encode($response);
 
 			}
