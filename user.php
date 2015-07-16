@@ -590,6 +590,22 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
         
             echo json_encode($response);
 			BREAK;
+
+		case "deleteUser":
+
+			$user_id = $_POST['userId'];
+
+			$result = $userFunc->deleteAccount($user_id);
+
+			if($result){
+				$response["success"] = 1;
+			}else{
+				$response["error"] = 1;
+				$response["message"] = "Une erreur s'est produite lors de la suppression du compte";
+			}
+
+			echo json_encode($response);
+			BREAK;
         
 		default : 
 			// le tag n'existe pas 
