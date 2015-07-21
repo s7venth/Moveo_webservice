@@ -160,7 +160,7 @@ class DB_TripFunctions {
      * Récupere une liste de voyage selon le mot recherché
      *
      */ 
-    public function getTripListByQuery($userId, $query){
+    public function getTripListByQuery($user_id, $query){
         
         $result = $this->pdo->query("SELECT t.trip_id, trip_name, trip_country, link_cover, user_last_name, user_first_name,
                                      count(DISTINCT comment_id) as comment_count, count(DISTINCT photo_id) as photo_count
@@ -332,7 +332,7 @@ class DB_TripFunctions {
 	 * @param email
 	 * retourne l'id s'il existe, faux s'il n'existe pas 
      */
-    public function checkId($user_id) { // A MODIFIER 
+    public function checkId($email) { // A MODIFIER
         $result = $this->pdo->query("SELECT user_id 
 									 FROM user 
 									 WHERE user_mail = '$email'");
@@ -427,6 +427,24 @@ class DB_TripFunctions {
             return false;
         }
                                      
+    }
+    /**
+     * Recuperation de la liste des commentaires en fonction d'un utilisateur
+     * @param $user_id
+     * @return vrai si la requête renvoi un résultat, faux s'il en n'envoie pas
+     */
+    public function getCommentListByUser($user_id){
+        $result = $this->pdo->query("SELECT comment_id, comment_message, comment_added_datetime, trip_id, comment.user_id, user_last_name, user_first_name, user_link_avatar
+                                     FROM comment,user
+                                     WHERE comment.user_id = '$user_id'
+                                     ");
+        $result = $result->fetchAll();
+        if ($result) {
+            return $result;
+        } else {
+            return false;
+        }
+
     }
 
     // ------------------ PHOTO ----------------------

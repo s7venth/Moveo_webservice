@@ -411,13 +411,44 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
 			}else{
 				$response["error"] = 1;
-				$response["error_msg"] = "Erreur lors de la récupération des photos";
+				$response["error_msg"] = "Erreur lors de la récupération des commentaires";
 			}
 
 			echo json_encode($response);
 
 			BREAK;
 
+		case "getCommentListByUser" :
+
+			$user_id = $_POST['user_id'];
+
+			$result = $tripFunc->getCommentListByUser($user_id);
+
+			if($result){
+
+				foreach ($result as $comment) {
+
+					$response['comment'][] = array('comment_id' => $comment['comment_id'] ,
+													   'comment_message' => $comment['comment_message'] ,
+													   'comment_added_datetime' => $comment['comment_added_datetime'] ,
+													   'trip_id' => $comment['trip_id'],
+													   'user_id' => $comment['user_id'],
+													   'user_last_name' => $comment['user_last_name'],
+													   'user_first_name' => $comment['user_first_name'],
+													   'user_link_avatar' => $comment["user_link_avatar"] );
+
+				}
+
+				$response['success'] = 1;
+
+			}else{
+				$response["error"] = 1;
+				$response["error_msg"] = "Erreur lors de la récupération des commentaires";
+			}
+
+			echo json_encode($response);
+
+			BREAK;
 
 		case "getPhotoGallery":
 
