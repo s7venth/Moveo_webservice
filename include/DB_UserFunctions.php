@@ -41,7 +41,7 @@ class DB_UserFunctions {
         if ($result) {
 			$user_id = $this->pdo->query("SELECT user_id FROM user WHERE user_email = '$email'");
 			$user_id = $user_id->fetch();
-			$a = mail($email, 'Activation de votre compte Moveo', 'Pour activer votre compte Moveo cliquer sur le lien suivant : http://127.0.0.1/Moveo_webservice/validation.php?key='.$validation_key_to_send.'&id='.$user_id['user_id']);
+			$a = mail($email, 'Activation de votre compte Moveo', 'Pour activer votre compte Moveo, cliquez sur le lien suivant : http://moveo.besaba.com/validation.php?key='.$validation_key_to_send.'&id='.$user_id['user_id']);
 			return true;
         } else {
 			return false;
@@ -112,15 +112,15 @@ class DB_UserFunctions {
     }
 	
 	public function getUserByLastNameAndFirstName($query, $user_id){
-		$result = $this->pdo->query("SELECT user.user_id, user_last_name, user_first_name, user_link_avatar, COUNT( trip_id ) AS trip_count
-                                  FROM user, trip
+		$result = $this->pdo->query("SELECT u.user_id, user_last_name, user_first_name, user_link_avatar, COUNT( trip_id ) AS trip_count
+                                  FROM (user as u)
+                                    LEFT JOIN trip ON (u.user_id = trip.user_id)
                                   WHERE (
                                   user_last_name LIKE '%$query%'
                                   OR user_first_name LIKE '%$query%'
                                   )
-                                  AND user.user_id != '$user_id'
-                                  AND user.user_id = trip.user_id
-                                  GROUP BY user.user_id
+                                  AND u.user_id != '$user_id'
+                                  GROUP BY u.user_id
                                   LIMIT 0 , 30
 									              ");
 									 
@@ -280,6 +280,7 @@ class DB_UserFunctions {
 	
 
     public function checkPassword($user_id, $password){
+
         $checked = false;
         $result = $this->pdo->query("SELECT user_password, user_security_key 
                                      FROM user 

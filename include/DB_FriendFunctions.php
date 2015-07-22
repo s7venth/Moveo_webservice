@@ -104,8 +104,8 @@ class DB_FriendFunctions {
         $result = $this->pdo->query("SELECT friend_id
                                      FROM is_friend
                                      WHERE is_accepted = 0
-                                     AND(is_friend.user_id = '$user_id' AND is_friend.friend_id = '$friend_id')
-                                     OR (is_friend.user_id = '$friend_id' AND is_friend.friend_id = '$user_id')");
+                                     AND((is_friend.user_id = '$user_id' AND is_friend.friend_id = '$friend_id')
+                                     OR (is_friend.user_id = '$friend_id' AND is_friend.friend_id = '$user_id'))");
                 
         $result = $result->fetch();
                 

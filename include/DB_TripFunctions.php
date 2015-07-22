@@ -31,7 +31,7 @@ class DB_TripFunctions {
      * @return vrai si le voyage a été ajouté, faux s'il ne l'a pas été
      */
     public function addTrip($country, $name, $description, $date, $cover, $user_id) {
-        
+
         $result = $this->pdo->exec("INSERT INTO trip(trip_name, trip_country, trip_description, trip_created_at, link_cover, user_id) 
 									VALUES('$name', '$country', '$description', '$date','$cover','$user_id')");
 		
@@ -160,7 +160,7 @@ class DB_TripFunctions {
      * Récupere une liste de voyage selon le mot recherché
      *
      */ 
-    public function getTripListByQuery($user_id, $query){
+    public function getTripListByQuery($userId, $query){
         
         $result = $this->pdo->query("SELECT t.trip_id, trip_name, trip_country, link_cover, user_last_name, user_first_name,
                                      count(DISTINCT comment_id) as comment_count, count(DISTINCT photo_id) as photo_count
@@ -332,7 +332,7 @@ class DB_TripFunctions {
 	 * @param email
 	 * retourne l'id s'il existe, faux s'il n'existe pas 
      */
-    public function checkId($email) { // A MODIFIER
+    public function checkId($user_id) { // A MODIFIER 
         $result = $this->pdo->query("SELECT user_id 
 									 FROM user 
 									 WHERE user_mail = '$email'");
@@ -356,12 +356,10 @@ class DB_TripFunctions {
 	 * @return vrai si l'ajout à réussi, faux s'il n'a pas réussi
 	 */
 	public function addComment($comment_message, $trip_id, $user_id){
-        //$date = date('H:i:s',mktime((date('H') + 2),(date('i')),(date('s'))));
-		//$timezone = new DateTimeZone('Europe/Paris');
 
         $date = new DateTime(null, new DateTimeZone('Europe/Paris'));
         //$date2 = new DateTime($date, $timezone);
-        $date->add(new DateInterval('PT5M20S'));
+        //$date->add(new DateInterval('PT5M20S'));
         $date =  $date->format('Y-m-d H:i:s');
         $result = $this->pdo->query("INSERT INTO comment (comment_message, comment_added_datetime, trip_id, user_id)
 									 VALUES ('$comment_message', '$date', '$trip_id', '$user_id')
@@ -428,7 +426,8 @@ class DB_TripFunctions {
         }
                                      
     }
-    /**
+
+        /**
      * Recuperation de la liste des commentaires en fonction d'un utilisateur
      * @param $user_id
      * @return vrai si la requête renvoi un résultat, faux s'il en n'envoie pas
@@ -453,12 +452,13 @@ class DB_TripFunctions {
      * Ajouter une nouvelle photo dans la galerie photo d'un voyage
      * 
      */
-    public function addPhoto($photo_link, $trip_id){
+    public function addPhoto($photo_link, $date, $trip_id){
+
         $result = $this->pdo->query("INSERT INTO photo (photo_link, photo_added_date, trip_id)
-                                     VALUES ('$photo_link', now(), '$trip_id')");
+                                     VALUES ('$photo_link', '$date', '$trip_id')");
 
         if($result){
-            return true;
+            return $this->pdo->lastInsertId();
         }else{
             return false;
         }
@@ -482,8 +482,10 @@ class DB_TripFunctions {
        $result = $this->pdo->query("SELECT photo_link
                                     FROM photo
 								    WHERE photo_id = '$photo_id'");
+        $result = $result->fetch();
+
         if ($result) {
-            return true;
+            return $result;
         }else{
             return false;
         }
@@ -513,6 +515,25 @@ class DB_TripFunctions {
         $result = $this->pdo->query("SELECT * 
                                      FROM photo
                                      WHERE trip_id = '$trip_id'
+                                     ");
+        $result = $result->fetchAll();
+        if($result){
+            return $result;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * Récuperation de la galerie photo de l'utilisateur
+     *
+     */
+    public function getPhotoGalleryByUserId($user_id){
+        $result = $this->pdo->query("SELECT photo_id, photo_link, photo_added_date, trip.trip_id 
+                                     FROM photo, trip, user
+                                     WHERE photo.trip_id = trip.trip_id
+                                     AND trip.user_id = user.user_id
+                                     AND trip.user_id = '$user_id'
                                      ");
         $result = $result->fetchAll();
         if($result){

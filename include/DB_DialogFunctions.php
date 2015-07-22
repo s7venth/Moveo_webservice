@@ -30,9 +30,10 @@ class DB_DialogFunctions {
      * @param $message Le message que souhaite envoyer l'expéditeur 
      */ 
     public function addDialog($user_id, $recipient_id, $message){
-         date_default_timezone_set('GMT');
-         setlocale(LC_TIME, 'fra_fra');
-        $date = date("Y-m-d H:i:s");
+         $date = new DateTime(null, new DateTimeZone('Europe/Paris'));
+        //$date2 = new DateTime($date, $timezone);
+        //$date->add(new DateInterval('PT5M20S'));
+        $date =  $date->format('Y-m-d H:i:s');
         $result = $this->pdo->exec("INSERT INTO dialog(user_id, recipient_id, message, sent_datetime, read_by_recipient, remove_by_user, remove_by_recipient) 
                                     VALUES('$user_id', '$recipient_id','$message', '$date', '0', '0', '0')");
                                     

@@ -113,9 +113,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 						// -------------RECUPERATION DES LIEUX-----------------
 						
 						$placesList = $tripFunc->getAllPlaces($userId);
-						
-						$tripFunc = null;
-						
+												
 						if($placesList) {
 							
 							foreach($placesList as $place) {
@@ -132,6 +130,28 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 							// Si la requête ne renvoie pas de lieu alors on initialise à 0
 							$response["place"] = 0;
 						}
+
+						// -------------PHOTO-------------
+
+						$photoList = $tripFunc->getPhotoGalleryByUserId($userId);
+
+						$tripFunc = null;
+
+						if($photoList) {
+							
+							foreach($photoList as $photo) {
+
+								$response['photo'][] = array('photo_id' => $photo['photo_id'] ,
+															 'photo_link' => $photo['photo_link'] ,
+															 'photo_added_date' => $photo['photo_added_date'] ,
+															 'trip_id' => $photo['trip_id']
+                                                            );
+							}
+						}else{
+							// Si la requête ne renvoie pas de photo alors on initialise à 0
+							$response["photo"] = 0;
+						}
+
 						
 						// -------------FRIEND------------
 						$friendFunc = new DB_FriendFunctions();
@@ -439,13 +459,11 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 			require_once 'include/DB_DialogFunctions.php';
 			$dialogFunc = new DB_DialogFunctions();
-			$result = $userFunc->readMessage($user_id, $recipient_id, $sent_datetime);
+			$result = $dialogFunc->readMessage($user_id, $recipient_id, $sent_datetime);
 			$dialogFunc = null;
 			
 			if($result){
-
 				$response["success"] = 1;
-
 			}else{
 
 				$response["error"] = 1;
@@ -465,7 +483,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 			require_once 'include/DB_DialogFunctions.php';
 			$dialogFunc = new DB_DialogFunctions();
-			$result = $userFunc->removeMessageInbox($user_id, $recipient_id, $sent_datetime);
+			$result = $dialogFunc->removeMessageInbox($user_id, $recipient_id, $sent_datetime);
 			$dialogFunc = null;
 			
 			if($result){
@@ -487,7 +505,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			
 			require_once 'include/DB_DialogFunctions.php';
 			$dialogFunc = new DB_DialogFunctions();
-			$result = $userFunc->removeMessageSendbox($user_id, $recipient_id, $sent_datetime);
+			$result = $dialogFunc->removeMessageSendbox($user_id, $recipient_id, $sent_datetime);
 			$dialogFunc = null;
 			
 			if($result){
@@ -529,9 +547,9 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 		
 		case 'changePassword':
 
-			$user_id = $_POST['user_id'];
+			$user_id = $_POST['userId'];
 			$password = $_POST['password'];
-			$new_password = $_POST['new_password'];
+			$new_password = $_POST['newPassword'];
 
 			$result = $userFunc->checkPassword($user_id, $password);
 
@@ -578,15 +596,21 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
             
             $user_id = $_POST['userId'];
             $password = $_POST['password'];
-        
-            $result = $userFunc->deleteAccount($user_id);
-        
-            if($result){
+       		$passwordResult = $userFunc->checkPassword($user_id, $password);
+			
+			if($passwordResult){
+            	$result = $userFunc->deleteAccount($user_id);
+        	
+	            if($result){
 					$response["success"] = 1;
-            }else{
+	            }else{
 					$response["error"] = 1;
 					$response["message"] = "Une erreur s'est produite lors de la suppression du compte";
-            }
+	            }
+	        }else{
+	        	$response["error"] = 1;
+				$response["message"] = "Mot de passe incorrect";
+	        }
         
             echo json_encode($response);
 			BREAK;
