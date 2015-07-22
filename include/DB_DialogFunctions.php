@@ -29,17 +29,31 @@ class DB_DialogFunctions {
      * @param $other_user_id l'identifiant de la personne à qui l'utilisateur envoi un message (récepteur)
      * @param $message Le message que souhaite envoyer l'expéditeur 
      */ 
-    public function addDialog($user_id, $recipient_id, $message){
-         $date = new DateTime(null, new DateTimeZone('Europe/Paris'));
-        //$date2 = new DateTime($date, $timezone);
-        //$date->add(new DateInterval('PT5M20S'));
-        $date =  $date->format('Y-m-d H:i:s');
+    public function addDialog($user_id, $recipient_id, $message, $date){
         $result = $this->pdo->exec("INSERT INTO dialog(user_id, recipient_id, message, sent_datetime, read_by_recipient, remove_by_user, remove_by_recipient) 
                                     VALUES('$user_id', '$recipient_id','$message', '$date', '0', '0', '0')");
                                     
         // verifier si la requête a réalisé l'ajout
         if ($result) {
             return true;
+        } else {
+            return false;
+        }
+    }
+	
+	/**
+	 * 
+	 *
+	 */
+	public function getUserNameAndUserFirstName($user_id){
+        $result = $this->pdo->exec("SELECT user_first_name, user_last_name 
+									FROM user
+									WHERE user_id = '$user_id'");
+                                    
+		$result = $result->fetch();
+	   
+        if ($result) {
+            return $result;
         } else {
             return false;
         }
