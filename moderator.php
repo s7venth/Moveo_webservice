@@ -63,22 +63,6 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
             }
             BREAK;
 
-        case 'getOthermoderator':
-
-            $otherModerator_id = $_POST['otherModerator_id'];
-
-            $result = $moderatorFunc->getOtherModerator($otherModerator_id);
-            if ($result != false) {
-                $response["success"] = 1;
-                $response["otherModerator"]["moderator_name"] = $result["moderator_name"];
-                echo json_encode($response);
-            } else {
-                $response["error"] = 1;
-                $response["error_msg"] = "Erreur lors de la recuperation du moderateur";
-                echo json_encode($response);
-            }
-            BREAK;
-
         case 'getUsers':
 
             $UsersList = $moderatorFunc->getUsers();
