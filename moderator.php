@@ -103,6 +103,27 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
             }
             BREAK;
 
+        case 'getModerators':
+
+            $UsersList = $moderatorFunc->getModerators();
+            if($UsersList) {
+                $response["success"] = 1;
+                foreach($UsersList as $user) {
+                    $response["moderator"][] = array(
+                        "moderator_id" => $user["moderator_id"],
+                        "moderator_name" => $user["moderator_name"],
+                        "moderator_email" => $user["moderator_email"],
+                        "is_admin" => $user["is_admin"]
+                    );
+                };
+                echo json_encode($response);
+            } else {
+                $response["error"] = 1;
+                $response["error_msg"] = "Erreur lors de la recuperation des moderateurs";
+                echo json_encode($response);
+            }
+            BREAK;
+
         case 'addDialog' : // ajouter un message avec l'exp�diteur et le r�cepteur
 
 

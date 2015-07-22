@@ -220,12 +220,28 @@ class DB_ModeratorFunctions
     }
 
     /**
+     * Function that return an array of users.
+     * It is a function especialy used by the moderator
+     * @return array|bool|PDOStatement the array of users or false if there is a problem.
+     */
+    public function getUsers(){
+        $result = $this->pdo->query("SELECT * FROM user");
+
+        $result = $result->fetchAll();
+
+        if($result) {
+            return $result;
+        } else {
+            return false;
+        }
+    }
+    /**
      * Function that return an array of moderators.
      * It is a function especialy used by the admin
      * @return array|bool|PDOStatement the array of moderators or false if there is a problem.
      */
-    public function getUsers(){
-        $result = $this->pdo->query("SELECT * FROM user");
+    public function getModerators(){
+        $result = $this->pdo->query("SELECT * FROM moderator");
 
         $result = $result->fetchAll();
 
