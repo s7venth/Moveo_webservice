@@ -85,6 +85,24 @@ class DB_UserFunctions {
         }
     }
 
+  /**
+   * Recuperation du nom et prenom d'un utilisateur
+   * @param user_id
+   */
+  public function getUserNameAndUserFirstName($user_id){
+        $result = $this->pdo->query("SELECT user_first_name, user_last_name 
+                  FROM user
+                  WHERE user_id = '$user_id'");
+                                    
+    $result = $result->fetch();
+     
+        if ($result) {
+            return $result;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Recupere tous les informations de l'utilisateur
 	 * @param email et password

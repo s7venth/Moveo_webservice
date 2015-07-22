@@ -40,24 +40,6 @@ class DB_DialogFunctions {
             return false;
         }
     }
-	
-	/**
-	 * 
-	 *
-	 */
-	public function getUserNameAndUserFirstName($user_id){
-        $result = $this->pdo->exec("SELECT user_first_name, user_last_name 
-									FROM user
-									WHERE user_id = '$user_id'");
-                                    
-		$result = $result->fetch();
-	   
-        if ($result) {
-            return $result;
-        } else {
-            return false;
-        }
-    }
     
     /**
      * Recupére tous les messages qu'a reçu l'utilisateur
@@ -69,7 +51,8 @@ class DB_DialogFunctions {
                                      FROM dialog, user
                                      WHERE recipient_id = '$user_id'
                                      AND user.user_id = dialog.user_id
-                                     AND remove_by_recipient = 0");
+                                     AND remove_by_recipient = 0
+									 ORDER BY sent_datetime");
 
         $result = $result->fetchAll();
         
@@ -90,7 +73,8 @@ class DB_DialogFunctions {
                                      FROM dialog d, user u
                                      WHERE u.user_id = d.recipient_id
                                      AND d.user_id = '$user_id'
-                                     AND remove_by_user = 0");
+                                     AND remove_by_user = 0
+									 ORDER BY sent_datetime");
 
         $result = $result->fetchAll();
         

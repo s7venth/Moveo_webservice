@@ -439,7 +439,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			//$date->add(new DateInterval('PT5M20S'));
 			$date =  $date->format('Y-m-d H:i:s');
 			
-			$resultUser = $dialogFunc->getUserNameAndUserFirstName($user_id);
+			$resultUser = $userFunc->getUserNameAndUserFirstName($recipient_id);
 			
 			if($resultUser){
 				$lastname = $resultUser["user_last_name"];
@@ -450,6 +450,8 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 				if($result){
 					$response["success"] = 1;
 					$response["date"] = $date;
+					$response["lastname"] = $lastname;
+					$response["firstname"] = $firstname;
 				}else{
 
 					$response["error"] = 1;
