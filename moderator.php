@@ -115,6 +115,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
                         "moderator_id" => $user["moderator_id"],
                         "moderator_name" => $user["moderator_name"],
                         "moderator_email" => $user["moderator_email"],
+                        "moderator_password" => $user["moderator_password"],
                         "is_admin" => $user["is_admin"]
                     );
                 };
