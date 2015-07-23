@@ -29,11 +29,7 @@ class DB_DialogFunctions {
      * @param $other_user_id l'identifiant de la personne à qui l'utilisateur envoi un message (récepteur)
      * @param $message Le message que souhaite envoyer l'expéditeur 
      */ 
-    public function addDialog($user_id, $recipient_id, $message){
-         $date = new DateTime(null, new DateTimeZone('Europe/Paris'));
-        //$date2 = new DateTime($date, $timezone);
-        //$date->add(new DateInterval('PT5M20S'));
-        $date =  $date->format('Y-m-d H:i:s');
+    public function addDialog($user_id, $recipient_id, $message, $date){
         $result = $this->pdo->exec("INSERT INTO dialog(user_id, recipient_id, message, sent_datetime, read_by_recipient, remove_by_user, remove_by_recipient) 
                                     VALUES('$user_id', '$recipient_id','$message', '$date', '0', '0', '0')");
                                     
@@ -55,7 +51,8 @@ class DB_DialogFunctions {
                                      FROM dialog, user
                                      WHERE recipient_id = '$user_id'
                                      AND user.user_id = dialog.user_id
-                                     AND remove_by_recipient = 0");
+                                     AND remove_by_recipient = 0
+									 ORDER BY sent_datetime");
 
         $result = $result->fetchAll();
         
@@ -76,7 +73,8 @@ class DB_DialogFunctions {
                                      FROM dialog d, user u
                                      WHERE u.user_id = d.recipient_id
                                      AND d.user_id = '$user_id'
-                                     AND remove_by_user = 0");
+                                     AND remove_by_user = 0
+									 ORDER BY sent_datetime");
 
         $result = $result->fetchAll();
         

@@ -433,18 +433,34 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			$message = $_POST['message'];
 			require_once 'include/DB_DialogFunctions.php';
 			$dialogFunc = new DB_DialogFunctions();
-			$result = $dialogFunc->addDialog($user_id, $recipient_id, $message);
-			$dialogFunc = null;
+
+			$date = new DateTime(null, new DateTimeZone('Europe/Paris'));
+			//$date2 = new DateTime($date, $timezone);
+			//$date->add(new DateInterval('PT5M20S'));
+			$date =  $date->format('Y-m-d H:i:s');
 			
-			if($result){
+			$resultUser = $userFunc->getUserNameAndUserFirstName($recipient_id);
+			
+			if($resultUser){
+				$lastname = $resultUser["user_last_name"];
+				$firstname = $resultUser["user_first_name"];
+				
+				$result = $dialogFunc->addDialog($user_id, $recipient_id, $message, $date);
+			
+				if($result){
+					$response["success"] = 1;
+					$response["date"] = $date;
+					$response["lastname"] = $lastname;
+					$response["firstname"] = $firstname;
+				}else{
 
-				$response["success"] = 1;
-
+					$response["error"] = 1;
+					$response["message"] = "Erreur lors de l'ajout du dialogue";
+				}
+				
 			}else{
-
 				$response["error"] = 1;
-				$response["message"] = "Erreur lors de l'ajout du dialogue";
-
+				$response["message"] = "Erreur lors de la recuperation de l'utilisateur";
 			}
 
 			echo json_encode($response);
