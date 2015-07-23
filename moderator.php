@@ -46,6 +46,24 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
             }
             BREAK;
 
+        case 'addModerator':
+
+            $moderator_name = $_POST['moderator_name'];
+            $moderator_email = $_POST['moderator_email'];
+            $moderator_password = $_POST['moderator_password'];
+            $moderator_isAdmin = $_POST['moderator_is_admin'];
+
+            $result = $moderatorFunc->addModerator($moderator_name,$moderator_email,$moderator_password,$moderator_isAdmin);
+
+            if ($result){
+                $response["success"] = 1;
+                echo json_encode($response);
+            }else {
+                $response["error"] = 1;
+                $response["message"] = "Erreur lors de l'ajout";
+                echo json_encode($response);
+            }
+
         case 'updateProfil':
 
             $moderator_id = $_POST['moderator_id'];
