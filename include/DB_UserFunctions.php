@@ -41,7 +41,7 @@ class DB_UserFunctions {
         if ($result) {
 			$user_id = $this->pdo->query("SELECT user_id FROM user WHERE user_email = '$email'");
 			$user_id = $user_id->fetch();
-			$a = mail($email, 'Activation de votre compte Moveo', 'Pour activer votre compte Moveo, cliquez sur le lien suivant : http://moveo.besaba.com/validation.php?key='.$validation_key_to_send.'&id='.$user_id['user_id']);
+			$a = mail($email, 'Activation de votre compte Moveo', 'Pour activer votre compte Moveo, cliquez sur le lien suivant : http://moveo.16mb.com/validation.php?key='.$validation_key_to_send.'&id='.$user_id['user_id']);
 			return true;
         } else {
 			return false;

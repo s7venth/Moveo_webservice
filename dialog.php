@@ -24,7 +24,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 			$user_id = $_POST['userId'];
 			$recipient_id = $_POST['recipientId'];
 			$message = $_POST['message'];
-			 $date = new DateTime(null, new DateTimeZone('Europe/Paris'));
+			$date = new DateTime(null, new DateTimeZone('Europe/Paris'));
 			//$date2 = new DateTime($date, $timezone);
 			//$date->add(new DateInterval('PT5M20S'));
 			$date =  $date->format('Y-m-d H:i:s');
