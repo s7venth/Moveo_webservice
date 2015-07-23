@@ -30,6 +30,14 @@ class DB_ModeratorFunctions
         $this->db = NULL;
     }
 
+    public function addModerator($name, $email, $password,$isAdmin){
+        $result = $this->pdo->query("INSERT INTO moderator (moderator_name, moderator_email, moderator_password,is_admin) VALUES ('$name','$email','$password','$isAdmin')");
+        if($result){
+            $user_id = $this->pdo->query("SELECT user_id FROM moderator WHERE moderator_email = '$email'");
+            return true;
+        }
+        else return false;
+    }
 
     /**
      * Mettre � jour les informations du moderateur
