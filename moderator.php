@@ -204,7 +204,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
                 echo json_encode($response);
             } else {
                 $response["error"] = 1;
-                $response["error_msg"] = "Erreur lors de la recuperation des utilisateurs";
+                $response["error_msg"] = "Erreur lors de la recuperation des signalements";
                 echo json_encode($response);
             }
         BREAK;
