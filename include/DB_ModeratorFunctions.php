@@ -99,21 +99,18 @@ class DB_ModeratorFunctions
     }
 
     /**
-     * R�cup�rer les informations d'un autre moderateur grace � son identifiant
-     * @param $moderator_id
-     * return Les informations d'un autre moderateur
+     * Function that return an array of moderators.
+     * It is a function especialy used by the admin
+     * @return array|bool|PDOStatement the array of moderators or false if there is a problem.
      */
-    public function getOtherModerator($otherModerator_id) {
-        $result = $this->pdo->query("SELECT moderator_name
-									 FROM moderator
-									 WHERE moderator_id = '$otherModerator_id'");
-        $result = $result->fetch();
+    public function getModerators(){
+        $result = $this->pdo->query("SELECT * FROM moderator");
+
+        $result = $result->fetchAll();
 
         if($result) {
-            // le moderateur existe
             return $result;
         } else {
-            // l'moderateur n'existe pas
             return false;
         }
     }
@@ -234,22 +231,6 @@ class DB_ModeratorFunctions
      */
     public function getUsers(){
         $result = $this->pdo->query("SELECT * FROM user");
-
-        $result = $result->fetchAll();
-
-        if($result) {
-            return $result;
-        } else {
-            return false;
-        }
-    }
-    /**
-     * Function that return an array of moderators.
-     * It is a function especialy used by the admin
-     * @return array|bool|PDOStatement the array of moderators or false if there is a problem.
-     */
-    public function getModerators(){
-        $result = $this->pdo->query("SELECT * FROM moderator");
 
         $result = $result->fetchAll();
 

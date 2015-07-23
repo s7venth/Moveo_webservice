@@ -107,10 +107,10 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
 
         case 'getModerators':
 
-            $UsersList = $moderatorFunc->getModerators();
-            if($UsersList) {
+            $moderatorsList = $moderatorFunc->getModerators();
+            if($moderatorsList) {
                 $response["success"] = 1;
-                foreach($UsersList as $user) {
+                foreach($moderatorsList as $user) {
                     $response["moderator"][] = array(
                         "moderator_id" => $user["moderator_id"],
                         "moderator_name" => $user["moderator_name"],
