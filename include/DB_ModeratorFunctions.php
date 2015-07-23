@@ -240,4 +240,11 @@ class DB_ModeratorFunctions
             return false;
         }
     }
+
+    public function getReported(){
+        $result = $this->pdo->query("SELECT * FROM to_report");
+        $result = $result->fetchAll();
+        if($result)return $result;
+        else return false;
+    }
 }

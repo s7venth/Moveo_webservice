@@ -191,6 +191,24 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
             }
             BREAK;
 
+        case 'getReported':
+            $reportedList = $moderatorFunc->getReported();
+            if ($reportedList){
+                $response["success"] = 1;
+                foreach($reportedList as $reported){
+                    $response["to_report"][]= array(
+                        "user_id" => $reported["user_id"],
+                        "photo_id" => $reported["photo_id"]
+                    );
+                };
+                echo json_encode($response);
+            } else {
+                $response["error"] = 1;
+                $response["error_msg"] = "Erreur lors de la recuperation des utilisateurs";
+                echo json_encode($response);
+            }
+        BREAK;
+
         default :
             // le tag n'existe pas
             echo "Requete invalide";
