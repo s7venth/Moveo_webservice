@@ -51,7 +51,7 @@ if (isset($_POST['tag']) && $_POST['tag'] != '') {
             $moderator_name = $_POST['moderator_name'];
             $moderator_email = $_POST['moderator_email'];
             $moderator_password = $_POST['moderator_password'];
-            $moderator_isAdmin = $_POST['moderator_is_admin'];
+            $moderator_isAdmin = $_POST['is_admin'];
 
             $result = $moderatorFunc->addModerator($moderator_name,$moderator_email,$moderator_password,$moderator_isAdmin);
 
